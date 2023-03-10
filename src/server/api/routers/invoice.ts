@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { invoiceSchema, itemsSchema } from "~/schemas/invoiceInfo";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const invoiceRouter = createTRPCRouter({
   // hello: publicProcedure
@@ -88,25 +84,30 @@ export const invoiceRouter = createTRPCRouter({
       const { id, invoiceFormSchema } = input;
       const { invoice, items } = invoiceFormSchema;
 
-      //  ctx.prisma.invoice.upsert({
-      //   where: {
-      //     id,
-      //   },
-      //   update: { ...invoice, ...items },
-      //  include: {
-      //   items: {
-      //     create: {
-      //       ...items,
-      //     },
-      //   },
-      //  },
-      // });
+      return ctx.prisma.$transaction([
+        ctx.prisma.items.deleteMany({ where: { invoiceId: id } }),
+        ctx.prisma.invoice.update({
+          where: { id },
+          data: {
+            ...invoice,
+            items: {
+              createMany: {
+                data: items,
+              },
+            },
+          },
+        }),
+      ]);
+    }),
 
-      // return ctx.prisma.items.upsert({
-      //   where: {
-      //     id: items.id,
-      //   },
-      // });
+  deleteInvoice: protectedProcedure
+    .input(z.string())
+    .mutation(({ ctx, input: id }) => {
+      return ctx.prisma.invoice.delete({
+        where: {
+          id,
+        },
+      });
     }),
 
   addItems: protectedProcedure.input(itemsSchema).mutation(({ ctx, input }) => {

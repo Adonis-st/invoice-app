@@ -1,8 +1,8 @@
 import { type NextPage } from "next";
-import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { api } from "~/utils/api";
+import Head from "next/head";
 import { Invoices } from "~/components/Invoices";
+import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
   return (

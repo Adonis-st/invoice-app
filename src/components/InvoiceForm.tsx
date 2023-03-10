@@ -12,7 +12,7 @@ import { modalAtom } from "~/store";
 import { useId } from "react";
 import SelectDropdown from "./ui/Select";
 import { api } from "~/utils/api";
-import { type Invoice, type Items } from "@prisma/client";
+import type { Invoice, Items } from "@prisma/client";
 
 interface Props {
   isEdit?: boolean;
@@ -41,7 +41,7 @@ export const InvoiceForm = ({
     formState: { errors },
   } = useForm<InvoiceFormInput>({
     resolver: zodResolver(invoiceFormSchema),
-
+    mode: "onBlur",
     defaultValues: { invoice, items: invoice?.items },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
@@ -51,7 +51,7 @@ export const InvoiceForm = ({
   const { mutate: updateInvoice } = api.invoice.editInvoice.useMutation();
 
   const addItem = () => {
-    append({ name: "", quantity: 0, price: 0.0, total: 0.0 });
+    append({ name: " ", quantity: 0, price: 0.0, total: 0.0 });
   };
 
   const getTotal = (index: number) => {
@@ -86,6 +86,7 @@ export const InvoiceForm = ({
     const invoice: InvoiceInput = { id: "XT3090", invoiceFormSchema };
 
     if (isEdit) {
+      updateInvoice(invoice);
     } else {
       addInvoice(invoice);
     }
@@ -107,10 +108,6 @@ export const InvoiceForm = ({
             Go Back
           </span>
         </button>
-
-        {/* <input type="text" defaultValue={formData?.items?.[0]?.name} />
-
-        <input type="text" defaultValue={formData?.status} className="mt-5" /> */}
 
         <h1 className="mt-6 text-[1.5rem] font-bold leading-[32px] tracking-[-0.5]">
           New Invoice
