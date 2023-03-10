@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "League Spartan", sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer components {
+  .heading-l {
+    @apply text-[2.25rem] font-bold leading-[33px] tracking-[-1px];
+  }
+
+  .heading-m {
+    @apply text-[1.5rem] font-bold leading-[22px] tracking-[-0.75px];
+  }
+
+  .heading-s {
+    @apply text-[.938rem] font-bold leading-[24px] tracking-[-0.25px];
+  }
+  .body {
+    @apply text-[.813rem] font-medium leading-[18px] tracking-[-0.1px];
+  }
+}
