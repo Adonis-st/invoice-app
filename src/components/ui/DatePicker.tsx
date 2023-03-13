@@ -3,6 +3,7 @@ import { type ComponentProps, useState, useRef, useEffect } from "react";
 import { getDaysInMonth, format, getYear } from "date-fns";
 import { datePickerAtom } from "~/store";
 import { useAtom } from "jotai";
+import { type UseFormRegister, type UseFormSetValue } from "react-hook-form";
 
 const dateStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
@@ -27,11 +28,11 @@ interface InputProps extends Props {
   className?: string;
   name: string;
   placeholder?: string;
-  register: any;
+  register: UseFormRegister<any>;
   label: string;
   errorMessage?: string;
   required?: boolean;
-  setValue: any;
+  setValue: UseFormSetValue<any>;
 }
 
 export default function DatePicker({

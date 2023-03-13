@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentProps } from "react";
+import { type UseFormRegister } from "react-hook-form";
 
 const inputStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
@@ -26,7 +27,7 @@ interface InputProps extends Props {
   type?: "text" | "email" | "password" | "number";
   name: string;
   placeholder?: string;
-  register: unknown;
+  register: UseFormRegister<any>;
   label: string;
   errorMessage?: string;
   required?: boolean;

@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentProps } from "react";
+import { type UseFormRegister } from "react-hook-form";
 
 const selectStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
@@ -25,7 +26,7 @@ interface SelectProps extends Props {
   divClass?: string;
   name: string;
   placeholder?: string;
-  register: any;
+  register: UseFormRegister<any>;
   label: string;
   errorMessage?: string;
   required?: boolean;
@@ -64,7 +65,6 @@ export default function SelectDropdown({
       <select
         className={selectStyles({ intent, sizes, className })}
         style={{ borderColor: errorMessage && "#EE374A" }}
-        type="select"
         {...register(name, {
           valueAsNumber: true,
         })}

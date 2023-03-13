@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-import { Button, DatePicker, TextInput } from "~/components/ui";
+import { modalAtom } from "~/store";
+import { Dialog, Transition } from "@headlessui/react";
+import { useAtom } from "jotai";
+import { Fragment } from "react";
+import { Button, DatePicker, TextInput, SelectDropdown } from "~/components/ui";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -7,29 +10,99 @@ import {
   invoiceFormSchema,
   type InvoiceInput,
 } from "~/schemas/invoiceInfo";
-import { useAtom } from "jotai";
-import { modalAtom } from "~/store";
 import { useId } from "react";
-import SelectDropdown from "./ui/Select";
 import { api } from "~/utils/api";
 import type { Invoice, Items } from "@prisma/client";
+import { createId, uniqueId } from "~/utils/generateId";
 
-interface Props {
+interface ModalProps {
   isEdit?: boolean;
-  formData:
-    | (Invoice & {
+  invoice?:
+    | Invoice & {
         items: Items[];
-      })
-    | null
-    | undefined;
+      };
+}
+export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
+  const [isOpen, setIsOpen] = useAtom(modalAtom);
+
+  return (
+    <>
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setIsOpen(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25 " />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center sm:pr-64">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full transform bg-white p-1  shadow-xl transition-all ">
+                  <InvoiceForm {...{ isEdit, invoice }} />
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </>
+  );
+};
+
+/* eslint-disable @typescript-eslint/no-misused-promises */
+
+interface FormProps {
+  isEdit: boolean;
+  invoice?:
+    | Invoice & {
+        items?: Items[];
+      };
 }
 
-export const InvoiceForm = ({
-  isEdit = false,
-  formData: invoice = null,
-}: Props) => {
+export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
   const formId = useId();
   const [, setIsOpen] = useAtom(modalAtom);
+
+  const invoicesIds = api.invoice.getInvoiceIds.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
+
+  const utils = api.useContext();
+
+  const { mutate: addInvoice, isLoading: addInvoiceIsLoading } =
+    api.invoice.addInvoice.useMutation({
+      onSuccess: () => {
+        void utils.invoice.getAllInvoices.invalidate();
+        setIsOpen(false);
+      },
+    });
+
+  const { mutate: editInvoice, isLoading: editInvoiceIsLoading } =
+    api.invoice.editInvoice.useMutation({
+      onSuccess: () => {
+        void utils.invoice.getSingleInvoice.invalidate();
+        setIsOpen(false);
+      },
+    });
 
   const {
     register,
@@ -42,13 +115,10 @@ export const InvoiceForm = ({
   } = useForm<InvoiceFormInput>({
     resolver: zodResolver(invoiceFormSchema),
     mode: "onBlur",
-    defaultValues: { invoice, items: invoice?.items },
+    defaultValues: isEdit ? { invoice, items: invoice?.items } : {},
   });
+
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
-
-  const { mutate: addInvoice } = api.invoice.addInvoice.useMutation();
-
-  const { mutate: updateInvoice } = api.invoice.editInvoice.useMutation();
 
   const addItem = () => {
     append({ name: " ", quantity: 0, price: 0.0, total: 0.0 });
@@ -80,15 +150,23 @@ export const InvoiceForm = ({
     setValue("invoice.total", total);
   };
 
-  console.log(errors, getValues());
-
   const onSubmit = (invoiceFormSchema: InvoiceFormInput) => {
-    const invoice: InvoiceInput = { id: "XT3090", invoiceFormSchema };
-
-    if (isEdit) {
-      updateInvoice(invoice);
+    if (isEdit && invoice?.id) {
+      const updateInvoice: InvoiceInput = {
+        id: invoice?.id,
+        invoiceFormSchema,
+      };
+      editInvoice(updateInvoice);
     } else {
-      addInvoice(invoice);
+      let id = createId();
+      const ids = invoicesIds?.data?.map((inv) => inv.id);
+      if (ids) {
+        while (!uniqueId({ id, ids })) {
+          id = createId();
+        }
+      }
+      const newInvoice: InvoiceInput = { id, invoiceFormSchema };
+      addInvoice(newInvoice);
     }
   };
   return (
@@ -327,6 +405,7 @@ export const InvoiceForm = ({
             <Button
               type="submit"
               form={formId}
+              isLoading={editInvoiceIsLoading}
               className="px-[.9rem]"
               size="sm"
             >
@@ -344,9 +423,11 @@ export const InvoiceForm = ({
               Discard
             </Button>
             <Button
+              onClick={() => setValue("invoice.status", "draft")}
               type="submit"
               size="sm"
               intent="dark"
+              isLoading={addInvoiceIsLoading}
               form={formId}
               className="mr-2 px-[.9rem] "
             >
@@ -355,6 +436,7 @@ export const InvoiceForm = ({
             <Button
               onClick={() => setValue("invoice.status", "pending")}
               type="submit"
+              isLoading={addInvoiceIsLoading}
               form={formId}
               className="px-[.9rem]"
               size="sm"

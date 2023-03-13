@@ -4,22 +4,6 @@ import { invoiceSchema, itemsSchema } from "~/schemas/invoiceInfo";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const invoiceRouter = createTRPCRouter({
-  // hello: publicProcedure
-  //   .input(z.object({ text: z.string() }))
-  //   .query(({ input }) => {
-  //     return {
-  //       greeting: `Hello ${input.text}`,
-  //     };
-  //   }),
-
-  //   getAll: publicProcedure.query(({ ctx }) => {
-  //     return ctx.prisma.example.findMany();
-  //   }),
-
-  // getSecretMessage: protectedProcedure.query(() => {
-  //   return "you can now see this secret message!";
-  // }),
-
   getAllInvoices: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.invoice.findMany({
       where: {
@@ -109,6 +93,17 @@ export const invoiceRouter = createTRPCRouter({
         },
       });
     }),
+
+  getInvoiceIds: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.invoice.findMany({
+      where: {
+        userId: ctx.session?.user?.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+  }),
 
   addItems: protectedProcedure.input(itemsSchema).mutation(({ ctx, input }) => {
     const { items, invoiceId: id } = input;

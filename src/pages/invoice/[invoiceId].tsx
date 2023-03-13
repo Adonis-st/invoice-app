@@ -4,10 +4,9 @@ import Error from "next/error";
 import Head from "next/head";
 import Link from "next/link";
 import { type NextRouter, useRouter } from "next/router";
-import { InvoiceForm } from "~/components/InvoiceForm";
-import { Modal } from "~/components/Modal";
-import { Button } from "~/components/ui";
-import { Spinner } from "~/components/ui/Spinner";
+import { InvoiceModal } from "~/components/InvoiceModal";
+import { Button, Spinner } from "~/components/ui";
+
 import { modalAtom } from "~/store";
 import { api } from "~/utils/api";
 import { formateDate } from "~/utils/formateDate";
@@ -21,10 +20,13 @@ export default function InvoicePage() {
   const invoiceId = router.query.invoiceId as string;
   const [isOpen, setIsopen] = useAtom(modalAtom);
 
-  const { data: invoice, isLoading } = api.invoice.getSingleInvoice.useQuery(
-    invoiceId,
-    { refetchOnWindowFocus: false }
-  );
+  const {
+    data: invoice,
+    isLoading,
+    refetch,
+  } = api.invoice.getSingleInvoice.useQuery(invoiceId, {
+    refetchOnWindowFocus: false,
+  });
 
   const { mutate: markAsPaid } = api.invoice.markAsPaid.useMutation();
 
@@ -44,10 +46,9 @@ export default function InvoicePage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mx-auto mt-7 w-[87%]">
-        {/* <InvoiceForm formData={invoice} isEdit={true} /> */}
-        {/* {isOpen && <Modal InvoiceForm={InvoiceForm} />} */}
+        {isOpen && <InvoiceModal invoice={invoice} isEdit={true} />}
         {isDeleting && (
-          <DeleteModal {...{ invoiceId, setIsDeleting, router }} />
+          <DeleteModal {...{ invoiceId, setIsDeleting, router, refetch }} />
         )}
         <Link href={"/"} className="flex items-center">
           <svg width="7" height="10" xmlns="http://www.w3.org/2000/svg">
@@ -179,12 +180,14 @@ export const DeleteModal = ({
   router,
 }: DeleteModalProps) => {
   const closeModal = () => setIsDeleting(false);
-  const { mutate } = api.invoice.deleteInvoice.useMutation();
+  const utils = api.useContext();
 
-  const deleteInvoice = () => {
-    mutate(invoiceId);
-    void router.push("/");
-  };
+  const { mutate, isLoading } = api.invoice.deleteInvoice.useMutation({
+    onSuccess: () => {
+      void utils.invoice.getAllInvoices.invalidate();
+      void router.push("/");
+    },
+  });
 
   return (
     <>
@@ -227,21 +230,23 @@ export const DeleteModal = ({
                     </p>
                   </div>
 
-                  <div className="mt-4  flex  justify-end  ">
+                  <div className="mt-4 flex justify-end ">
                     <Button
                       type="button"
                       intent="secondary"
                       size="sm"
                       className="heading-s mr-3"
+                      onClick={() => setIsDeleting(false)}
                     >
                       Cancel
                     </Button>
                     <Button
                       type="button"
                       size="sm"
+                      isLoading={isLoading}
                       intent="danger"
                       className="heading-s "
-                      onClick={() => deleteInvoice()}
+                      onClick={() => mutate(invoiceId)}
                     >
                       Delete
                     </Button>
