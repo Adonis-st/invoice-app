@@ -1,9 +1,9 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { type ComponentProps, useState, useRef, useEffect } from "react";
-import { getDaysInMonth, format, getYear } from "date-fns";
-import { datePickerAtom } from "~/store";
+import { format, getDaysInMonth, getYear } from "date-fns";
 import { useAtom } from "jotai";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { type UseFormRegister, type UseFormSetValue } from "react-hook-form";
+import { datePickerAtom } from "~/store";
 
 const dateStyles = cva("rounded-md border focus:outline-none ", {
   variants: {

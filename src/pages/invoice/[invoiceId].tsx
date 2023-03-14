@@ -1,20 +1,22 @@
+import { Dialog, Transition } from "@headlessui/react";
 import { useAtom } from "jotai";
+import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Error from "next/error";
 import Head from "next/head";
 import Link from "next/link";
-import { type NextRouter, useRouter } from "next/router";
+import { useRouter, type NextRouter } from "next/router";
+import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
 import { InvoiceModal } from "~/components/InvoiceModal";
 import { Button, Spinner } from "~/components/ui";
 
 import { modalAtom } from "~/store";
+
 import { api } from "~/utils/api";
 import { formateDate } from "~/utils/formateDate";
 import { InvoiceStatus } from "~/utils/Status";
-import { Dialog, Transition } from "@headlessui/react";
-import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 
-export default function InvoicePage() {
+const InvoicePage: NextPage = () => {
   const router = useRouter();
   const { data: sessionData } = useSession();
   const invoiceId = router.query.invoiceId as string;
@@ -166,8 +168,9 @@ export default function InvoicePage() {
       </div>
     </>
   );
-}
+};
 
+export default InvoicePage;
 interface DeleteModalProps {
   invoiceId: string;
   setIsDeleting: Dispatch<SetStateAction<boolean>>;

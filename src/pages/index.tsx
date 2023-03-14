@@ -1,29 +1,40 @@
-import { type NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Head from "next/head";
-import Error from "next/error";
-import { api } from "~/utils/api";
-import { Filter } from "~/features/invoice/Filter";
-import { invoiceAtom, modalAtom } from "~/store";
-import { formateDate } from "~/utils/formateDate";
-import { InvoiceStatus } from "~/utils/Status";
+import type { Invoice } from "@prisma/client";
 import { useAtom } from "jotai";
+import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
+import Error from "next/error";
+import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { InvoiceModal } from "~/components/InvoiceModal";
 import { Button, Spinner } from "~/components/ui";
-import type { Invoice } from "@prisma/client";
-import { createId } from "~/utils/generateId";
+import { Filter } from "~/features/invoice/Filter";
+import { modalAtom } from "~/store";
+import { api } from "~/utils/api";
+import { formateDate } from "~/utils/formateDate";
+import { InvoiceStatus } from "~/utils/Status";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
-  const { data: invoices, isLoading } = api.invoice.getAllInvoices.useQuery();
+  const router = useRouter();
+  const { data: invoices, isLoading } = api.invoice.getAllInvoices.useQuery(
+    undefined,
+    { enabled: sessionData?.user !== undefined }
+  );
 
-  if (!sessionData) return null;
+  useEffect(() => {
+    if (!sessionData?.user) {
+      void router.push("/login");
+    }
+  }, [sessionData?.user]);
+
+  if (!sessionData?.user) return null;
 
   if (isLoading) return <Spinner />;
 
   if (!invoices) return <Error statusCode={404} />;
-  console.log(createId());
+
   return (
     <>
       <Head>
@@ -123,30 +134,6 @@ const Invoices = ({ invoices }: { invoices: Invoice[] }) => {
           </p>
         </div>
       )}
-    </div>
-  );
-};
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4 ">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full px-10 py-3 font-semibold text-black no-underline transition "
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
     </div>
   );
 };

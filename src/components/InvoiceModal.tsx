@@ -1,18 +1,17 @@
-import { modalAtom } from "~/store";
 import { Dialog, Transition } from "@headlessui/react";
-import { useAtom } from "jotai";
-import { Fragment } from "react";
-import { Button, DatePicker, TextInput, SelectDropdown } from "~/components/ui";
-import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Invoice, Items } from "@prisma/client";
+import { useAtom } from "jotai";
+import { Fragment, useId } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { Button, DatePicker, SelectDropdown, TextInput } from "~/components/ui";
 import {
-  type InvoiceFormInput,
   invoiceFormSchema,
+  type InvoiceFormInput,
   type InvoiceInput,
 } from "~/schemas/invoiceInfo";
-import { useId } from "react";
+import { modalAtom } from "~/store";
 import { api } from "~/utils/api";
-import type { Invoice, Items } from "@prisma/client";
 import { createId, uniqueId } from "~/utils/generateId";
 
 interface ModalProps {
