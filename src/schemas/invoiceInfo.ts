@@ -17,3 +17,11 @@ export const itemsSchema = z.object({
   invoiceId: hasId,
   items,
 });
+
+export const filterSchema = z.object({
+  draft: z.boolean(),
+  pending: z.boolean(),
+  paid: z.boolean(),
+});
+
+export type Filter = z.infer<typeof filterSchema>;

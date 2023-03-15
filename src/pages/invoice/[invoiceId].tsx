@@ -9,9 +9,7 @@ import { useRouter, type NextRouter } from "next/router";
 import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
 import { InvoiceModal } from "~/components/InvoiceModal";
 import { Button, Spinner } from "~/components/ui";
-
 import { modalAtom } from "~/store";
-
 import { api } from "~/utils/api";
 import { formateDate } from "~/utils/formateDate";
 import { InvoiceStatus } from "~/utils/Status";
@@ -30,7 +28,11 @@ const InvoicePage: NextPage = () => {
     refetchOnWindowFocus: false,
   });
 
-  const { mutate: markAsPaid } = api.invoice.markAsPaid.useMutation();
+  const utils = api.useContext();
+
+  const { mutate: markAsPaid } = api.invoice.markAsPaid.useMutation({
+    onSuccess: () => void utils.invoice.getSingleInvoice.invalidate(),
+  });
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -185,12 +187,13 @@ export const DeleteModal = ({
   const closeModal = () => setIsDeleting(false);
   const utils = api.useContext();
 
-  const { mutate, isLoading } = api.invoice.deleteInvoice.useMutation({
-    onSuccess: () => {
-      void utils.invoice.getAllInvoices.invalidate();
-      void router.push("/");
-    },
-  });
+  const { mutate: deleteInvoice, isLoading } =
+    api.invoice.deleteInvoice.useMutation({
+      onSuccess: () => {
+        void utils.invoice.getAllInvoices.invalidate();
+        void router.push("/");
+      },
+    });
 
   return (
     <>
@@ -249,7 +252,7 @@ export const DeleteModal = ({
                       isLoading={isLoading}
                       intent="danger"
                       className="heading-s "
-                      onClick={() => mutate(invoiceId)}
+                      onClick={() => deleteInvoice(invoiceId)}
                     >
                       Delete
                     </Button>

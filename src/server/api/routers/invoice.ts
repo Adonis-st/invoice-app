@@ -1,15 +1,27 @@
 import { z } from "zod";
-import { invoiceSchema, itemsSchema } from "~/schemas/invoiceInfo";
+import {
+  filterSchema,
+  invoiceSchema,
+  itemsSchema,
+} from "~/schemas/invoiceInfo";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const invoiceRouter = createTRPCRouter({
-  getAllInvoices: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.invoice.findMany({
-      where: {
-        userId: ctx.session?.user?.id,
-      },
-    });
-  }),
+  getAllInvoices: protectedProcedure
+    .input(filterSchema)
+    .query(({ ctx, input }) => {
+      const { draft, pending, paid } = input;
+      return ctx.prisma.invoice.findMany({
+        where: {
+          userId: ctx.session?.user?.id,
+          OR: [
+            { status: draft ? "draft" : undefined },
+            { status: pending ? "pending" : undefined },
+            { status: paid ? "paid" : undefined },
+          ],
+        },
+      });
+    }),
 
   addInvoice: protectedProcedure
     .input(invoiceSchema)

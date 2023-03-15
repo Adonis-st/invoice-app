@@ -1,4 +1,4 @@
-import type { Invoice } from "@prisma/client";
+import { Menu, Transition } from "@headlessui/react";
 import { useAtom } from "jotai";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
@@ -6,20 +6,35 @@ import Error from "next/error";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import {
+  type ChangeEvent,
+  type Dispatch,
+  Fragment,
+  type SetStateAction,
+  useEffect,
+  useState,
+} from "react";
+import { HiChevronDown } from "react-icons/hi2";
 import { InvoiceModal } from "~/components/InvoiceModal";
-import { Button, Spinner } from "~/components/ui";
-import { Filter } from "~/features/invoice/Filter";
+import { Button, Checkbox, Spinner } from "~/components/ui";
+import { Filter } from "~/schemas/invoiceInfo";
 import { modalAtom } from "~/store";
 import { api } from "~/utils/api";
 import { formateDate } from "~/utils/formateDate";
 import { InvoiceStatus } from "~/utils/Status";
 
 const Home: NextPage = () => {
+  const [isOpen, setIsopen] = useAtom(modalAtom);
+  const [checked, setChecked] = useState({
+    draft: true,
+    pending: true,
+    paid: true,
+  });
+
   const { data: sessionData } = useSession();
   const router = useRouter();
   const { data: invoices, isLoading } = api.invoice.getAllInvoices.useQuery(
-    undefined,
+    checked,
     { enabled: sessionData?.user !== undefined }
   );
 
@@ -44,96 +59,169 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <Invoices invoices={invoices} />
-        {/* <AuthShowcase /> */}
+        <div className="mx-auto mt-8 w-[90%]">
+          {isOpen && <InvoiceModal />}
+
+          <div className="flex justify-between">
+            <div>
+              <h1 className="heading-m">Invoices</h1>
+              <span className="body leading-[15px] text-gray">
+                {invoices.length
+                  ? `${invoices.length} invoices`
+                  : "No Invoices"}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Filter {...{ checked, setChecked }} />
+
+              <Button
+                size="xs"
+                className="body flex items-center justify-center pr-2"
+                onClick={() => setIsopen(true)}
+              >
+                <div className="mr-2 rounded-full bg-white p-2">
+                  <svg
+                    width="11"
+                    height="11"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6.313 10.023v-3.71h3.71v-2.58h-3.71V.023h-2.58v3.71H.023v2.58h3.71v3.71z"
+                      fill="#7C5DFA"
+                      fillRule="nonzero"
+                    />
+                  </svg>
+                </div>
+                New
+              </Button>
+            </div>
+          </div>
+          {invoices.length ? (
+            <div className="mt-10 mb-[200rem]">
+              {invoices?.map((invoice) => {
+                return (
+                  <Link
+                    href={`/invoice/${invoice.id}`}
+                    key={invoice.id}
+                    className="mb-4 block rounded-lg bg-white p-6"
+                  >
+                    <div className="flex justify-between">
+                      <span>
+                        # <span>{invoice.id}</span>
+                      </span>
+
+                      <span className="body text-[#858BB2]">
+                        {invoice.clientName}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex justify-between">
+                      <div className="flex flex-col">
+                        <span className="body text-light_blue">
+                          {"Due " + formateDate(invoice.paymentDue)}
+                        </span>
+                        <span className="heading-s mt-2 text-coal">
+                          ${invoice.total.toFixed(2)}
+                        </span>
+                      </div>
+                      {InvoiceStatus(invoice.status)}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-16 flex flex-col items-center">
+              <img
+                src="/assets/illustration-empty.svg"
+                alt="illustration-empty"
+              />
+              <h3 className="heading-m mt-10 text-coal">
+                There is nothing here
+              </h3>
+              <p className="body mt-5 w-[176px] text-center text-gray">
+                Create an invoice by clicking the{" "}
+                <span className="font-bold">New</span> button and get started
+              </p>
+            </div>
+          )}
+        </div>
       </main>
     </>
   );
 };
-
 export default Home;
 
-const Invoices = ({ invoices }: { invoices: Invoice[] }) => {
-  // const [invoices] = useAtom(invoiceAtom);
-
-  const [isOpen, setIsopen] = useAtom(modalAtom);
+const Filter = ({
+  checked,
+  setChecked,
+}: {
+  checked: Filter;
+  setChecked: Dispatch<SetStateAction<Filter>>;
+}) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setChecked((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.checked,
+    }));
+  };
 
   return (
-    <div className="mx-auto mt-8 w-[90%]">
-      {isOpen && <InvoiceModal />}
-
-      <div className="flex justify-between">
-        <div>
-          <h1 className="heading-m">Invoices</h1>
-          <span className="body leading-[15px] text-gray">
-            {invoices.length ? `${invoices.length} invoices` : "No Invoices"}
-          </span>
-        </div>
-        <div className="flex items-center">
-          <Filter />
-
-          <Button
-            size="xs"
-            className="body flex items-center justify-center pr-2"
-            onClick={() => setIsopen(true)}
+    <Menu as="div" className="relative inline-block text-left">
+      {({ open }) => (
+        <>
+          <div>
+            <Menu.Button className="inline-flex w-full justify-center rounded-md bg-white bg-opacity-20 px-4 py-2 text-sm font-medium text-coal hover:bg-opacity-30 ">
+              Filter
+              <HiChevronDown
+                className={`${
+                  open ? "rotate-180" : ""
+                } ml-2 -mr-1 h-5 w-5 text-purple transition duration-200 ease-in-out`}
+                aria-hidden="true"
+              />
+            </Menu.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
           >
-            <div className="mr-2 rounded-full bg-white p-2">
-              <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M6.313 10.023v-3.71h3.71v-2.58h-3.71V.023h-2.58v3.71H.023v2.58h3.71v3.71z"
-                  fill="#7C5DFA"
-                  fillRule="nonzero"
-                />
-              </svg>
-            </div>
-            New
-          </Button>
-        </div>
-      </div>
-      {invoices.length ? (
-        <div className="mt-10 mb-[200rem]">
-          {invoices?.map((invoice) => {
-            return (
-              <Link
-                href={`/invoice/${invoice.id}`}
-                key={invoice.id}
-                className="mb-4 block rounded-lg bg-white p-6"
-              >
-                <div className="flex justify-between">
-                  <span>
-                    # <span>{invoice.id}</span>
-                  </span>
+            <Menu.Items
+              className="absolute right-0 mt-2 w-32 rounded-lg 
+                  bg-white shadow-[0px_10px_20px_rgba(72,84,159,0.25)] focus:outline-none"
+            >
+              <div className="px-1 py-1">
+                <div className="px-2 py-2">
+                  <Checkbox
+                    name="draft"
+                    label="Draft"
+                    checked={checked.draft}
+                    onChange={handleChange}
+                  />
 
-                  <span className="body text-[#858BB2]">
-                    {invoice.clientName}
-                  </span>
-                </div>
+                  <Checkbox
+                    name="pending"
+                    label="Pending"
+                    checked={checked.pending}
+                    onChange={handleChange}
+                  />
 
-                <div className="mt-3 flex justify-between">
-                  <div className="flex flex-col">
-                    <span className="body text-light_blue">
-                      {"Due " + formateDate(invoice.paymentDue)}
-                    </span>
-                    <span className="heading-s mt-2 text-coal">
-                      ${invoice.total.toFixed(2)}
-                    </span>
-                  </div>
-                  {InvoiceStatus(invoice.status)}
+                  <Checkbox
+                    name="paid"
+                    label="Paid"
+                    checked={checked.paid}
+                    onChange={handleChange}
+                  />
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="mt-16 flex flex-col items-center">
-          <img src="/assets/illustration-empty.svg" alt="illustration-empty" />
-          <h3 className="heading-m mt-10 text-coal">There is nothing here</h3>
-          <p className="body mt-5 w-[176px] text-center text-gray">
-            Create an invoice by clicking the{" "}
-            <span className="font-bold">New</span> button and get started
-          </p>
-        </div>
+              </div>
+            </Menu.Items>
+          </Transition>
+        </>
       )}
-    </div>
+    </Menu>
   );
 };

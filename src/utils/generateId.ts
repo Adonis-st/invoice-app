@@ -27,7 +27,7 @@ const letters = [
   "z",
 ];
 
-export const createId = (ids?: string[]) => {
+export const createId = () => {
   let id = "";
 
   for (let i = 0; i < 2; i++) {
@@ -43,6 +43,5 @@ export const createId = (ids?: string[]) => {
   return id;
 };
 
-export const uniqueId = ({ id, ids }: { id: string; ids: string[] }) => {
-  return !ids.includes(id);
-};
+export const uniqueId = ({ id, ids }: { id: string; ids: string[] }) =>
+  !ids.includes(id);
