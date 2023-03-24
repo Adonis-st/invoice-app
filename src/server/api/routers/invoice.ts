@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  filterSchema,
-  invoiceSchema,
-  itemsSchema,
-} from "~/schemas/invoiceInfo";
+import { filterSchema, invoiceSchema } from "~/schemas/invoiceInfo";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const invoiceRouter = createTRPCRouter({
@@ -78,7 +74,6 @@ export const invoiceRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       const { id, invoiceFormSchema } = input;
       const { invoice, items } = invoiceFormSchema;
-
       return ctx.prisma.$transaction([
         ctx.prisma.items.deleteMany({ where: { invoiceId: id } }),
         ctx.prisma.invoice.update({
@@ -112,20 +107,6 @@ export const invoiceRouter = createTRPCRouter({
       },
       select: {
         id: true,
-      },
-    });
-  }),
-
-  addItems: protectedProcedure.input(itemsSchema).mutation(({ ctx, input }) => {
-    const { items, invoiceId: id } = input;
-    return ctx.prisma.items.create({
-      data: {
-        ...items,
-        invoice: {
-          connect: {
-            id,
-          },
-        },
       },
     });
   }),

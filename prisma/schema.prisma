@@ -86,7 +86,7 @@ model Invoice {
     items         Items[]
     total         Float
     user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId        String
+    userId        String   @unique
 }
 
 model Items {

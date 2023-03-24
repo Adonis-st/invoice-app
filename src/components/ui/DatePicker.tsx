@@ -9,7 +9,7 @@ const dateStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
     intent: {
       primary:
-        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 focus:border-purple",
+        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 focus:border-purple disabled:bg-transparent disabled:text-opacity-30 disabled:border-selago/30",
     },
     sizes: {
       sm: "w-1/2",
@@ -26,6 +26,7 @@ type Props = VariantProps<typeof dateStyles> & ComponentProps<"input">;
 
 interface InputProps extends Props {
   className?: string;
+  divClass?: string;
   name: string;
   placeholder?: string;
   register: UseFormRegister<any>;
@@ -33,11 +34,13 @@ interface InputProps extends Props {
   errorMessage?: string;
   required?: boolean;
   setValue: UseFormSetValue<any>;
+  disabled?: boolean;
 }
 
 export default function DatePicker({
   sizes,
   intent,
+  divClass,
   setValue,
   name,
   register,
@@ -45,6 +48,7 @@ export default function DatePicker({
   label,
   errorMessage,
   className,
+  disabled = false,
   required = true,
   ...props
 }: InputProps) {
@@ -134,10 +138,21 @@ export default function DatePicker({
   };
 
   return (
-    <div className="relative mb-6 flex flex-col" ref={ref}>
+    <div
+      className={divClass}
+      ref={ref}
+      style={{
+        position: "relative",
+        marginBottom: "1.5rem",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <label
         htmlFor={name}
-        className="mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue"
+        className={`${
+          disabled ? "text-light_blue/30" : "text-light_blue"
+        } mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px]  `}
       >
         {label}
       </label>
@@ -155,6 +170,7 @@ export default function DatePicker({
           readOnly={true}
           onFocus={() => setOpen(true)}
           ref={inputRef}
+          disabled={disabled}
           placeholder={placeholder}
           aria-required={required}
           aria-invalid={errorMessage ? "true" : "false"}

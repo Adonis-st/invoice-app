@@ -9,7 +9,7 @@ export const InvoiceStatus = (invoiceStatus: string) => {
   }
   return (
     <div
-      className="flex h-[40px] w-[104px] items-center justify-center rounded-md bg-[#33D69F]/20 capitalize "
+      className="flex h-[40px] w-[104px] shrink-0 grow-0 items-center justify-center rounded-md  bg-[#33D69F]/20 capitalize"
       style={{ color, backgroundColor: color + "0f" }}
     >
       <div

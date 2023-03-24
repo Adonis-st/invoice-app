@@ -28,7 +28,7 @@ interface InputProps extends Props {
   name: string;
   placeholder?: string;
   register: UseFormRegister<any>;
-  label: string;
+  label?: string;
   errorMessage?: string;
   required?: boolean;
 }
@@ -52,12 +52,14 @@ export default function TextInput({
       className={divClass}
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <label
-        htmlFor={name}
-        className="mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={name}
+          className="mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue"
+        >
+          {label}
+        </label>
+      )}
       <input
         className={inputStyles({ intent, sizes, className })}
         style={{ borderColor: errorMessage && "#EE374A" }}

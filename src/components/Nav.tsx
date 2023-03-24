@@ -1,18 +1,16 @@
-import { modalAtom } from "~/store";
-import { useAtom } from "jotai";
-import { useState, useEffect, Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import { Fragment, useEffect, useState } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { MdModeEditOutline } from "react-icons/md";
 
 export const Nav = () => {
   const { data: sessionData } = useSession();
   const [darkMode, setDarkMode] = useState(false);
-  const [isOpen, setIsOpen] = useAtom(modalAtom);
   const scrollDirection = useScrollDirection();
 
-  if (!sessionData) return null;
+  if (!sessionData?.user) return null;
 
   return (
     <nav
@@ -21,7 +19,10 @@ export const Nav = () => {
       } sticky z-20 flex items-center bg-[#373B53] transition-all duration-500`}
     >
       <div className="flex w-full items-center justify-between border-r border-[#494E6E] pr-4">
-        <div className="flex aspect-square w-[72px] items-center justify-center rounded-r-3xl bg-purple">
+        <Link
+          href={"/"}
+          className="flex  aspect-square w-[72px] items-center justify-center rounded-r-3xl bg-purple"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="26">
             <path
               fill="#FFF"
@@ -29,7 +30,7 @@ export const Nav = () => {
               d="M20.513 0C24.965 2.309 28 6.91 28 12.21 28 19.826 21.732 26 14 26S0 19.826 0 12.21C0 6.91 3.035 2.309 7.487 0L14 12.9z"
             />
           </svg>
-        </div>
+        </Link>
         <button onClick={() => setDarkMode((prevState) => !prevState)}>
           {darkMode ? (
             <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -85,12 +86,13 @@ const useScrollDirection = () => {
 
 const ProfileSettings: React.FC = () => {
   const { data: sessionData } = useSession();
+
   return (
     <Menu as="div" className="">
       <div>
         <Menu.Button className="p-5 ">
           <img
-            src={`${sessionData?.user?.image || "/assets/aegim - avatar.jpg"}`}
+            src={sessionData?.user?.image || "/assets/image-avatar.jpg"}
             alt="avatar"
             className="aspect-square w-10 max-w-full rounded-full"
           />

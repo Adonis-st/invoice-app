@@ -17,6 +17,7 @@ const config = {
         snow: "#F8F8FB",
         very_dark_navy: "#141625"
       },
+
     },
   },
   plugins: [],

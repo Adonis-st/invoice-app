@@ -1,20 +1,20 @@
 import { Menu, Transition } from "@headlessui/react";
 import { useAtom } from "jotai";
 import { type NextPage } from "next";
+import { getServerSession } from "next-auth/next";
 import { useSession } from "next-auth/react";
 import Error from "next/error";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import {
-  type ChangeEvent,
-  type Dispatch,
   Fragment,
-  type SetStateAction,
   useEffect,
   useState,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
-import { HiChevronDown } from "react-icons/hi2";
 import { InvoiceModal } from "~/components/InvoiceModal";
 import { Button, Checkbox, Spinner } from "~/components/ui";
 import { Filter } from "~/schemas/invoiceInfo";
@@ -31,24 +31,48 @@ const Home: NextPage = () => {
     paid: true,
   });
 
-  const { data: sessionData } = useSession();
+  const { draft, pending, paid } = checked;
   const router = useRouter();
-  const { data: invoices, isLoading } = api.invoice.getAllInvoices.useQuery(
-    checked,
-    { enabled: sessionData?.user !== undefined }
-  );
+
+  const { data: sessionData, status: sessionStatus } = useSession();
+  const unAuthorized = sessionStatus === "unauthenticated";
+  const loading = sessionStatus === "loading";
+
+  // Start fetching asap
+  const { data: invoices } = api.invoice.getAllInvoices.useQuery(checked, {
+    enabled: sessionData?.user !== undefined,
+  });
+
+  const totalInvoice = () => {
+    let filteredInvoice = "total";
+
+    if (draft && !pending && !paid) {
+      filteredInvoice = "draft";
+    } else if (pending && !draft && !paid) {
+      filteredInvoice = "pending";
+    } else if (paid && !pending && !draft) {
+      filteredInvoice = "paid";
+    }
+
+    return filteredInvoice;
+  };
 
   useEffect(() => {
-    if (!sessionData?.user) {
-      void router.push("/login");
+    // check if the session is loading or the router is not ready
+    if (loading || !router.isReady) return;
+
+    // if the user is not authorized, redirect to the login page
+    // with a return url to the current page
+    if (unAuthorized) {
+      void router.push({
+        pathname: "/login",
+        query: { returnUrl: router.asPath },
+      });
     }
-  }, [sessionData?.user]);
+  }, [loading, sessionStatus, router, unAuthorized]);
 
-  if (!sessionData?.user) return null;
-
-  if (isLoading) return <Spinner />;
-
-  if (!invoices) return <Error statusCode={404} />;
+  // if the user refreshed the page or somehow navigated to the protected page
+  if (loading) return <>Loading app...</>;
 
   return (
     <>
@@ -59,15 +83,24 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="mx-auto mt-8 w-[90%]">
+        <div className="mx-auto mt-8 w-[90%] sm:max-w-[672px]">
           {isOpen && <InvoiceModal />}
 
           <div className="flex justify-between">
             <div>
-              <h1 className="heading-m">Invoices</h1>
-              <span className="body leading-[15px] text-gray">
-                {invoices.length
-                  ? `${invoices.length} invoices`
+              <h1 className="heading-m sm:heading-l">Invoices</h1>
+
+              {/* Mobile only */}
+              <span className="body leading-[15px] text-gray sm:hidden">
+                {invoices?.length
+                  ? `${invoices?.length} invoices`
+                  : "No Invoices"}
+              </span>
+
+              {/* Desktop only */}
+              <span className="body hidden leading-[15px] text-gray sm:inline">
+                {invoices?.length
+                  ? `There are ${invoices?.length} ${totalInvoice()} invoices`
                   : "No Invoices"}
               </span>
             </div>
@@ -76,10 +109,10 @@ const Home: NextPage = () => {
 
               <Button
                 size="xs"
-                className="body flex items-center justify-center pr-2"
+                className="body flex items-center justify-center pr-2 sm:pr-4"
                 onClick={() => setIsopen(true)}
               >
-                <div className="mr-2 rounded-full bg-white p-2">
+                <div className="mr-2 rounded-full bg-white p-[.67rem] sm:mr-4">
                   <svg
                     width="11"
                     height="11"
@@ -92,59 +125,12 @@ const Home: NextPage = () => {
                     />
                   </svg>
                 </div>
-                New
+                <span className="sm:hidden">New</span>
+                <span className="heading-s hidden sm:inline">New Invoice</span>
               </Button>
             </div>
           </div>
-          {invoices.length ? (
-            <div className="mt-10 mb-[200rem]">
-              {invoices?.map((invoice) => {
-                return (
-                  <Link
-                    href={`/invoice/${invoice.id}`}
-                    key={invoice.id}
-                    className="mb-4 block rounded-lg bg-white p-6"
-                  >
-                    <div className="flex justify-between">
-                      <span>
-                        # <span>{invoice.id}</span>
-                      </span>
-
-                      <span className="body text-[#858BB2]">
-                        {invoice.clientName}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 flex justify-between">
-                      <div className="flex flex-col">
-                        <span className="body text-light_blue">
-                          {"Due " + formateDate(invoice.paymentDue)}
-                        </span>
-                        <span className="heading-s mt-2 text-coal">
-                          ${invoice.total.toFixed(2)}
-                        </span>
-                      </div>
-                      {InvoiceStatus(invoice.status)}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="mt-16 flex flex-col items-center">
-              <img
-                src="/assets/illustration-empty.svg"
-                alt="illustration-empty"
-              />
-              <h3 className="heading-m mt-10 text-coal">
-                There is nothing here
-              </h3>
-              <p className="body mt-5 w-[176px] text-center text-gray">
-                Create an invoice by clicking the{" "}
-                <span className="font-bold">New</span> button and get started
-              </p>
-            </div>
-          )}
+          <InvoiceList checked={checked} />
         </div>
       </main>
     </>
@@ -171,14 +157,26 @@ const Filter = ({
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="inline-flex w-full justify-center rounded-md bg-white bg-opacity-20 px-4 py-2 text-sm font-medium text-coal hover:bg-opacity-30 ">
-              Filter
-              <HiChevronDown
+            <Menu.Button className="inline-flex w-full  items-center justify-center rounded-md  bg-opacity-20 px-4 py-2 text-sm font-bold text-coal hover:bg-opacity-30 sm:mr-6">
+              <span className="sm:hidden">Filter</span>
+              <span className="hidden sm:inline">Filter by Status</span>
+              <svg
+                width="11"
+                height="7"
+                xmlns="http://www.w3.org/2000/svg"
                 className={`${
                   open ? "rotate-180" : ""
-                } ml-2 -mr-1 h-5 w-5 text-purple transition duration-200 ease-in-out`}
+                } ml-2 text-purple  transition duration-200 ease-in-out `}
                 aria-hidden="true"
-              />
+              >
+                <path
+                  d="M1 1l4.228 4.228L9.456 1"
+                  stroke="#7C5DFA"
+                  strokeWidth="2"
+                  fill="none"
+                  fillRule="evenodd"
+                />
+              </svg>
             </Menu.Button>
           </div>
           <Transition
@@ -223,5 +221,93 @@ const Filter = ({
         </>
       )}
     </Menu>
+  );
+};
+
+const InvoiceList = ({ checked }: { checked: Filter }) => {
+  const { data: invoices, isLoading } =
+    api.invoice.getAllInvoices.useQuery(checked);
+
+  if (isLoading) return <Spinner />;
+
+  return (
+    <>
+      {invoices?.length ? (
+        <div className="mt-10">
+          {invoices?.map((invoice) => {
+            return (
+              <Link
+                href={`/invoice/${invoice.id}`}
+                key={invoice.id}
+                className="mb-4 block rounded-lg bg-white p-6 sm:flex sm:items-center sm:px-5 sm:py-4"
+              >
+                <div className="flex justify-between ">
+                  <span className="text-light_blue  ">
+                    #<span className="heading-s text-coal">{invoice.id}</span>
+                  </span>
+
+                  {/* Mobile only */}
+                  <span className="body text-[#858BB2] sm:hidden">
+                    {invoice.clientName}
+                  </span>
+                </div>
+
+                <div className="flex justify-between max-sm:mt-3 sm:w-full sm:items-center">
+                  <div className="flex max-sm:flex-col sm:w-full sm:items-center ">
+                    <span className="body text-light_blue sm:ml-7">
+                      {"Due " + formateDate(invoice.paymentDue)}
+                    </span>
+
+                    {/* Desktop only */}
+                    <span className="body ml-12 mr-auto hidden text-[#858BB2] sm:inline">
+                      {invoice.clientName}
+                    </span>
+
+                    <span className="heading-s  text-coal max-sm:mt-2 sm:mr-10">
+                      ${invoice.total.toFixed(2)}
+                    </span>
+                  </div>
+                  {InvoiceStatus(invoice.status)}
+
+                  <svg
+                    width="7"
+                    height="10"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="ml-5 hidden sm:inline"
+                  >
+                    <path
+                      d="M1 1l4 4-4 4"
+                      stroke="#7C5DFA"
+                      strokeWidth="2"
+                      fill="none"
+                      fillRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center 2xl:mt-16 ">
+          <img src="/assets/illustration-empty.svg" alt="illustration-empty" />
+          <h3 className="heading-m mt-10 w-max text-coal sm:mt-12">
+            There is nothing here
+          </h3>
+          <p className="body mt-5 w-[176px] text-center text-gray sm:w-[193px] ">
+            <span className="sm:hidden ">
+              Create an invoice by clicking the{" "}
+              <span className="font-bold">New</span> button and get started
+            </span>
+
+            <span className="hidden sm:inline ">
+              Create a new invoice by clicking the{" "}
+              <span className="font-bold">New Invoice</span>button and get
+              started
+            </span>
+          </p>
+        </div>
+      )}
+    </>
   );
 };

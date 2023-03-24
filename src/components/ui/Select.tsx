@@ -6,7 +6,7 @@ const selectStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
     intent: {
       primary:
-        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3",
+        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 sm:py-4",
     },
     sizes: {
       sm: "w-1/2",

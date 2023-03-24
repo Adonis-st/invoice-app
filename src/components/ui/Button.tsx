@@ -13,8 +13,8 @@ const buttonStyles = cva(
         danger: "bg-danger rounded-full text-white lg:hover:bg-danger_hover ",
       },
       size: {
-        xs: "p-1",
-        sm: "py-3 px-6",
+        xs: "p-1 sm:p-2",
+        sm: "py-4 px-6",
         md: "py-4 px-8",
       },
       fullWidth: {
@@ -27,7 +27,6 @@ const buttonStyles = cva(
     },
   }
 );
-
 type ButtonProps = VariantProps<typeof buttonStyles> & ComponentProps<"button">;
 
 interface Props extends ButtonProps {
