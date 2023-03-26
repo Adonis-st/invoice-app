@@ -13,8 +13,8 @@ const buttonStyles = cva(
         danger: "bg-danger rounded-full text-white lg:hover:bg-danger_hover ",
       },
       size: {
-        xs: "p-1 sm:p-2",
-        sm: "py-4 px-6",
+        xs: "p-1 sm:p-2 ",
+        sm: "py-4 px-[1.63rem]",
         md: "py-4 px-8",
       },
       fullWidth: {

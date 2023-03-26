@@ -1,9 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import { useAtom } from "jotai";
 import { type NextPage } from "next";
-import { getServerSession } from "next-auth/next";
 import { useSession } from "next-auth/react";
-import Error from "next/error";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -72,7 +70,7 @@ const Home: NextPage = () => {
   }, [loading, sessionStatus, router, unAuthorized]);
 
   // if the user refreshed the page or somehow navigated to the protected page
-  if (loading) return <>Loading app...</>;
+  if (loading) return <Spinner />;
 
   return (
     <>
@@ -83,12 +81,12 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="mx-auto mt-8 w-[90%] sm:max-w-[672px]">
+        <div className="mx-auto mt-8 w-[90%] sm:mt-12 sm:max-w-[672px] lg:mt-16 lg:max-w-[730px]">
           {isOpen && <InvoiceModal />}
 
           <div className="flex justify-between">
             <div>
-              <h1 className="heading-m sm:heading-l">Invoices</h1>
+              <h1 className="heading-m sm:heading-l text-coal">Invoices</h1>
 
               {/* Mobile only */}
               <span className="body leading-[15px] text-gray sm:hidden">
@@ -233,16 +231,16 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
   return (
     <>
       {invoices?.length ? (
-        <div className="mt-10">
+        <div className="mt-10 lg:mt-14">
           {invoices?.map((invoice) => {
             return (
               <Link
                 href={`/invoice/${invoice.id}`}
                 key={invoice.id}
-                className="mb-4 block rounded-lg bg-white p-6 sm:flex sm:items-center sm:px-5 sm:py-4"
+                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
               >
-                <div className="flex justify-between ">
-                  <span className="text-light_blue  ">
+                <div className="flex justify-between">
+                  <span className="text-light_blue">
                     #<span className="heading-s text-coal">{invoice.id}</span>
                   </span>
 
@@ -254,16 +252,16 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
 
                 <div className="flex justify-between max-sm:mt-3 sm:w-full sm:items-center">
                   <div className="flex max-sm:flex-col sm:w-full sm:items-center ">
-                    <span className="body text-light_blue sm:ml-7">
+                    <span className="body text-light_blue sm:ml-7 lg:ml-10">
                       {"Due " + formateDate(invoice.paymentDue)}
                     </span>
 
                     {/* Desktop only */}
-                    <span className="body ml-12 mr-auto hidden text-[#858BB2] sm:inline">
+                    <span className="body ml-12 mr-auto hidden text-[#858BB2] sm:inline lg:ml-16">
                       {invoice.clientName}
                     </span>
 
-                    <span className="heading-s  text-coal max-sm:mt-2 sm:mr-10">
+                    <span className="heading-s  text-coal max-sm:mt-2 sm:mr-10 ">
                       ${invoice.total.toFixed(2)}
                     </span>
                   </div>
@@ -300,9 +298,15 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
               <span className="font-bold">New</span> button and get started
             </span>
 
-            <span className="hidden sm:inline ">
+            <span className="hidden sm:inline lg:hidden ">
               Create a new invoice by clicking the{" "}
-              <span className="font-bold">New Invoice</span>button and get
+              <span className="font-bold">New Invoice</span> button and get
+              started
+            </span>
+
+            <span className="hidden lg:inline ">
+              Create an invoice by clicking the{" "}
+              <span className="font-bold">New Invoice</span> button and get
               started
             </span>
           </p>

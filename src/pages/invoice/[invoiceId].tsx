@@ -174,13 +174,11 @@ const InvoicePage: NextPage = () => {
             {/* //Todo fix this on mobile */}
             <div className="rounded-t-lg bg-[#F9FAFE] p-6 sm:p-7">
               <table className="w-full">
-                <tr className="body mb-6 text-left  text-light_blue max-sm:hidden">
-                  <th className="font-medium">Item Name</th>
-                  {/* <div className="flex w-1/2 justify-between"> */}
+                <tr className="body mb-6 text-left text-light_blue max-sm:hidden">
+                  <th className="w-1/2 font-medium">Item Name</th>
                   <th className="font-medium">QTY.</th>
                   <th className="text-right font-medium">Price</th>
                   <th className="text-right font-medium">Total</th>
-                  {/* </div> */}
                 </tr>
                 <div className="mb-6 max-sm:hidden" />
 
@@ -189,7 +187,7 @@ const InvoicePage: NextPage = () => {
                     <>
                       <tr className="mb-5  last:mb-0" key={index}>
                         <div className="max-sm:flex max-sm:flex-col">
-                          <td className="heading-s  leading-[20px] text-coal sm:w-1/2">
+                          <td className="heading-s leading-[20px] text-coal">
                             {item.name}
                           </td>
 
@@ -249,7 +247,7 @@ interface DeleteModalProps {
   router: NextRouter;
 }
 
-export const DeleteModal = ({
+const DeleteModal = ({
   invoiceId,
   setIsDeleting,
   router,
@@ -292,19 +290,18 @@ export const DeleteModal = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-[327px] transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-[327px] transform overflow-hidden rounded-lg bg-white p-9 text-left align-middle shadow-xl transition-all sm:max-w-[480px] sm:p-12">
                   <Dialog.Title
                     as="h3"
-                    className="heading-m tracking-[-0.5px] text-coal"
+                    className="heading-m tracking-[-0.5px] text-coal "
                   >
                     Confirm Deletion
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="body leading-[22px] text-gray">
-                      Are you sure you want to delete invoice #{invoiceId}? This
-                      action cannot be undone.
-                    </p>
-                  </div>
+
+                  <p className="body mt-2 leading-[22px] text-gray ">
+                    Are you sure you want to delete invoice #{invoiceId}? This
+                    action cannot be undone.
+                  </p>
 
                   <div className="mt-4 flex justify-end ">
                     <Button

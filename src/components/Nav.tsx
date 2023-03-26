@@ -15,13 +15,13 @@ export const Nav = () => {
   return (
     <nav
       className={`${
-        scrollDirection === "down" ? "-top-24" : "top-0"
-      } sticky z-20 flex items-center bg-[#373B53] transition-all duration-500`}
+        scrollDirection === "down" ? "max-lg:-top-24 lg:top-0" : " top-0"
+      } sticky z-20 flex bg-[#373B53] transition-all duration-500 max-lg:items-center lg:fixed lg:left-0 lg:h-full lg:w-[103px] lg:flex-col lg:items-center lg:rounded-br-[20px] lg:rounded-tr-3xl`}
     >
-      <div className="flex w-full items-center justify-between border-r border-[#494E6E] pr-4">
+      <div className="flex w-full items-center justify-between border-[#494E6E] max-lg:border-r max-lg:pr-4 lg:h-full lg:flex-col lg:border-b lg:pb-8">
         <Link
           href={"/"}
-          className="flex  aspect-square w-[72px] items-center justify-center rounded-r-3xl bg-purple"
+          className="flex aspect-square w-[72px] items-center justify-center rounded-r-3xl bg-purple lg:w-[103px]"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="26">
             <path
@@ -94,7 +94,7 @@ const ProfileSettings: React.FC = () => {
           <img
             src={sessionData?.user?.image || "/assets/image-avatar.jpg"}
             alt="avatar"
-            className="aspect-square w-10 max-w-full rounded-full"
+            className="aspect-square w-10 max-w-full rounded-full "
           />
         </Menu.Button>
       </div>

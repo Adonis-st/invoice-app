@@ -29,7 +29,7 @@ export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-10"
+          className="relative z-10 "
           onClose={() => setIsOpen(false)}
         >
           <Transition.Child
@@ -41,11 +41,11 @@ export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25 " />
+            <div className="fixed inset-0 bg-black bg-opacity-50 " />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center sm:pr-64">
+            <div className="min-h-full">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -55,7 +55,7 @@ export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full transform bg-white p-1  shadow-xl transition-all ">
+                <Dialog.Panel className="mt-[72px] w-full transform bg-white shadow-xl transition-all sm:max-w-[616px] sm:rounded-r-[20px] lg:max-w-[719px]">
                   <InvoiceForm {...{ isEdit, invoice }} />
                 </Dialog.Panel>
               </Transition.Child>
@@ -68,7 +68,6 @@ export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
 };
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
-
 interface FormProps {
   isEdit: boolean;
   invoice?:
@@ -150,6 +149,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
   };
 
   const onSubmit = (invoiceFormSchema: InvoiceFormInput) => {
+    // Editing the invoice
     if (isEdit && invoice?.id) {
       const updateInvoice: InvoiceInput = {
         id: invoice?.id,
@@ -157,6 +157,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
       };
       editInvoice(updateInvoice);
     } else {
+      // Creating a new inovice
       let id = createId();
       const ids = invoicesIds?.data?.map((inv) => inv.id);
       if (ids) {
@@ -170,9 +171,9 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
   };
   return (
     <>
-      <div className="mx-auto mt-24 w-[90%]">
+      <div className="mx-auto mt-6 w-[90%] p-1 ">
         <button
-          className="flex items-center sm:hidden"
+          className="mt-4 flex items-center sm:hidden"
           onClick={() => setIsOpen(false)}
         >
           <svg width="7" height="10" xmlns="http://www.w3.org/2000/svg">
@@ -189,7 +190,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
           </span>
         </button>
 
-        <h1 className="pt-6 text-[1.5rem] font-bold leading-[32px] tracking-[-0.5] ">
+        <h1 className="pt-6 text-[1.5rem] font-bold leading-[32px] tracking-[-0.5]">
           {isEdit ? (
             <>
               Edit <span className="text-gray">#</span>
@@ -310,15 +311,16 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                 divClass="sm:w-full"
               />
             </div>
-
-            <TextInput
-              name="invoice.description"
-              label="Project Description"
-              placeholder="e.g. Graphic Design Service"
-              register={register}
-              errorMessage={errors.invoice?.description?.message}
-            />
           </div>
+          <TextInput
+            name="invoice.description"
+            label="Project Description"
+            placeholder="e.g. Graphic Design Service"
+            register={register}
+            errorMessage={errors.invoice?.description?.message}
+            divClass="max-sm:mt-6"
+          />
+
           <h3 className="mt-14 mb-4 text-[1.125rem] font-bold tracking-[-0.38px] text-[#777F98] sm:mt-6">
             Item List
           </h3>
@@ -327,13 +329,13 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
           <div className="sm:hidden">
             {fields.map((field, index) => {
               return (
-                <div key={index}>
+                <div key={index} className="mb-10">
                   <TextInput
                     name={`items.${index}.name`}
                     label="Item Name"
                     register={register}
                   />
-                  <div className="mt-5 mb-10 flex items-center gap-x-4">
+                  <div className="mt-5 flex items-center gap-x-4">
                     <TextInput
                       type="number"
                       name={`items.${index}.quantity`}
@@ -385,19 +387,19 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
           </div>
 
           {/* Desktop Only */}
-          <div className="max-sm:hidden">
-            <div className="flex justify-between text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue">
-              <span>Item Name</span>
-              <span>Qty.</span>
-              <span>Price</span>
-              <span>Total</span>
+          <div className="mb-5 max-sm:hidden">
+            <div className="mb-3 flex w-full gap-x-4 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue">
+              <span className="w-[214px]">Item Name</span>
+              <span className="w-[46px]">Qty.</span>
+              <span className="w-[100px]">Price</span>
+              <span className="w-55px">Total</span>
             </div>
             {fields.map((field, index) => {
               return (
-                <div key={index} className="flex gap-x-4">
+                <div key={index} className="mb-5 flex w-full gap-x-4">
                   <TextInput
                     name={`items.${index}.name`}
-                    divClass="w-full"
+                    divClass="w-[214px]"
                     register={register}
                   />
 
@@ -405,7 +407,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                     type="number"
                     name={`items.${index}.quantity`}
                     register={register}
-                    className="w-16"
+                    divClass="min-w-[46px]"
                     onBlur={() => getTotal(index)}
                   />
 
@@ -413,20 +415,22 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                     type="number"
                     name={`items.${index}.price`}
                     step="0.01"
+                    divClass="w-[100px] items-center "
+                    // className="text-center"
                     register={register}
                     onBlur={() => getTotal(index)}
-                    className="w-[100px]"
                   />
 
                   <TextInput
                     type="number"
                     name={`items.${index}.total`}
                     disabled
+                    divClass="w-[55px]"
                     register={register}
                   />
 
                   <button
-                    className="mt-3 mr-1 shrink-0"
+                    className="shrink-0"
                     type="button"
                     onClick={() => remove(index)}
                   >
@@ -449,7 +453,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
           <Button
             intent="secondary"
             fullWidth
-            className="mb-10"
+            className="mb-10 sm:mb-6"
             type="button"
             onClick={() => addItem()}
           >
@@ -467,15 +471,14 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
         </form>
       </div>
 
-      <div className="heading-s flex w-full bg-white p-5 leading-[15px]">
+      <div className="heading-s bottom-0 flex w-full bg-white p-5 leading-[15px] sm:sticky sm:rounded-r-[20px] sm:p-7">
         {isEdit ? (
           <>
             <Button
               type="button"
               intent="secondary"
-              size="xs"
               onClick={() => setIsOpen(false)}
-              className="mr-2 px-[1.1rem] "
+              className="mr-2 px-[1.63rem] sm:ml-auto"
             >
               Cancel
             </Button>
@@ -484,8 +487,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
               type="submit"
               form={formId}
               isLoading={editInvoiceIsLoading}
-              className="px-[.9rem]"
-              size="sm"
+              className="px-[1.40rem]"
             >
               Save Changes
             </Button>
@@ -495,19 +497,18 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
             <Button
               type="button"
               intent="secondary"
-              size="xs"
-              className="mr-2 px-[1.1rem] "
+              className="mr-2 px-[1.1rem] sm:px-6"
+              onClick={() => setIsOpen(false)}
             >
               Discard
             </Button>
             <Button
               onClick={() => setValue("invoice.status", "draft")}
               type="submit"
-              size="sm"
               intent="dark"
               isLoading={addInvoiceIsLoading}
               form={formId}
-              className="mr-2 px-[.9rem] "
+              className="mr-2 px-[.9rem] sm:ml-auto sm:px-[1.37rem]"
             >
               Save as Draft
             </Button>
@@ -516,8 +517,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
               type="submit"
               isLoading={addInvoiceIsLoading}
               form={formId}
-              className="px-[.9rem]"
-              size="sm"
+              className="px-[.9rem] sm:px-[1.37rem]"
             >
               Save & Send
             </Button>
