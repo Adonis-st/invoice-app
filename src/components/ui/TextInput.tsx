@@ -6,7 +6,7 @@ const inputStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
     intent: {
       primary:
-        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 disabled:border-none disabled:bg-transparent disabled:text-gray bg-white disabled:px-0 ",
+        "border-selago dark:border-navy text-coal dark:text-white font-bold text-[0.938rem] tracking-[-0.25px] p-3 disabled:border-none disabled:bg-transparent dark:disabled:bg-transparent disabled:text-gray bg-white disabled:px-0 dark:bg-dark_Navy",
     },
     sizes: {
       sm: "w-1/2",
@@ -55,7 +55,7 @@ export default function TextInput({
       {label && (
         <label
           htmlFor={name}
-          className="mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue"
+          className="mb-1 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue dark:text-selago"
         >
           {label}
         </label>

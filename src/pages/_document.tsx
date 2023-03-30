@@ -15,7 +15,7 @@ export default function Document() {
           rel="stylesheet"
         />
       </Head>
-      <body className="bg-snow">
+      <body>
         <Main />
         <NextScript />
       </body>

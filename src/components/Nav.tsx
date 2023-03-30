@@ -1,22 +1,29 @@
 import { Menu, Transition } from "@headlessui/react";
+import { useAtom } from "jotai";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { MdModeEditOutline } from "react-icons/md";
+import { darKModeAtom } from "~/store";
 
 export const Nav = () => {
   const { data: sessionData } = useSession();
-  const [darkMode, setDarkMode] = useState(false);
-  const scrollDirection = useScrollDirection();
+  const [darkMode, setDarkMode] = useAtom(darKModeAtom);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   if (!sessionData?.user) return null;
 
   return (
     <nav
-      className={`${
-        scrollDirection === "down" ? "max-lg:-top-24 lg:top-0" : " top-0"
-      } sticky z-20 flex bg-[#373B53] transition-all duration-500 max-lg:items-center lg:fixed lg:left-0 lg:h-full lg:w-[103px] lg:flex-col lg:items-center lg:rounded-br-[20px] lg:rounded-tr-3xl`}
+      className={`sticky top-0 z-20 flex bg-[#373B53] transition-all duration-500 dark:bg-dark_Navy max-lg:items-center lg:fixed lg:left-0 lg:h-full lg:w-[103px] lg:flex-col lg:items-center lg:rounded-br-[20px] lg:rounded-tr-3xl`}
     >
       <div className="flex w-full items-center justify-between border-[#494E6E] max-lg:border-r max-lg:pr-4 lg:h-full lg:flex-col lg:border-b lg:pb-8">
         <Link
@@ -31,7 +38,10 @@ export const Nav = () => {
             />
           </svg>
         </Link>
-        <button onClick={() => setDarkMode((prevState) => !prevState)}>
+        <button
+          className=" p-1 "
+          onClick={() => setDarkMode((prevState) => !prevState)}
+        >
           {darkMode ? (
             <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -54,34 +64,6 @@ export const Nav = () => {
       <ProfileSettings />
     </nav>
   );
-};
-
-const useScrollDirection = () => {
-  const [scrollDirection, setScrollDirection] = useState<"down" | "up" | "">(
-    ""
-  );
-
-  useEffect(() => {
-    let lastScrollY = window.pageYOffset;
-
-    const updateScrollDirection = () => {
-      const scrollY = window.pageYOffset;
-      const direction = scrollY > lastScrollY ? "down" : "up";
-      if (
-        direction !== scrollDirection &&
-        (scrollY - lastScrollY > 5 || scrollY - lastScrollY < -5)
-      ) {
-        setScrollDirection(direction);
-      }
-      lastScrollY = scrollY > 0 ? scrollY : 0;
-    };
-    window.addEventListener("scroll", updateScrollDirection); // add event listener
-    return () => {
-      window.removeEventListener("scroll", updateScrollDirection); // clean up
-    };
-  }, [scrollDirection]);
-
-  return scrollDirection;
 };
 
 const ProfileSettings: React.FC = () => {
@@ -107,31 +89,17 @@ const ProfileSettings: React.FC = () => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="divide-gray-100 absolute right-2 origin-top-right divide-y rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="divide-gray-100 absolute right-2 origin-top-right divide-y rounded-lg bg-white shadow-lg focus:outline-none dark:bg-navy lg:bottom-4 lg:left-28">
           <div className="px-1 py-1 ">
-            <Menu.Item>
-              {({ active }) => (
-                <button
-                  className={`${
-                    active ? "bg-violet-500 text-white" : "text-gray-900"
-                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                >
-                  <MdModeEditOutline
-                    className={`${
-                      active ? "fill-white" : "fill-violet-500"
-                    } mr-2 aspect-square w-4 `}
-                  />
-                  Edit
-                </button>
-              )}
-            </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                 <button
                   onClick={() => void signOut()}
                   className={`${
-                    active ? "bg-violet-500 text-white" : "text-gray-900"
-                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    active
+                      ? "bg-violet-500 text-white "
+                      : "bg-white text-coal dark:bg-dark_Navy dark:text-white"
+                  } group flex w-max items-center rounded-md  px-2 py-2 text-sm`}
                 >
                   <FaSignOutAlt
                     className={`${

@@ -86,17 +86,19 @@ const Home: NextPage = () => {
 
           <div className="flex justify-between">
             <div>
-              <h1 className="heading-m sm:heading-l text-coal">Invoices</h1>
+              <h1 className="heading-m sm:heading-l text-coal dark:text-white">
+                Invoices
+              </h1>
 
               {/* Mobile only */}
-              <span className="body leading-[15px] text-gray sm:hidden">
+              <span className="body leading-[15px] text-gray dark:text-selago sm:hidden">
                 {invoices?.length
                   ? `${invoices?.length} invoices`
                   : "No Invoices"}
               </span>
 
               {/* Desktop only */}
-              <span className="body hidden leading-[15px] text-gray sm:inline">
+              <span className="body hidden leading-[15px] text-gray dark:text-selago sm:inline">
                 {invoices?.length
                   ? `There are ${invoices?.length} ${totalInvoice()} invoices`
                   : "No Invoices"}
@@ -156,8 +158,10 @@ const Filter = ({
         <>
           <div>
             <Menu.Button className="inline-flex w-full  items-center justify-center rounded-md  bg-opacity-20 px-4 py-2 text-sm font-bold text-coal hover:bg-opacity-30 sm:mr-6">
-              <span className="sm:hidden">Filter</span>
-              <span className="hidden sm:inline">Filter by Status</span>
+              <span className="dark:text-white sm:hidden">Filter</span>
+              <span className="hidden dark:text-white sm:inline">
+                Filter by Status
+              </span>
               <svg
                 width="11"
                 height="7"
@@ -188,7 +192,7 @@ const Filter = ({
           >
             <Menu.Items
               className="absolute right-0 mt-2 w-32 rounded-lg 
-                  bg-white shadow-[0px_10px_20px_rgba(72,84,159,0.25)] focus:outline-none"
+                  bg-white shadow-[0px_10px_20px_rgba(72,84,159,0.25)] focus:outline-none dark:bg-navy"
             >
               <div className="px-1 py-1">
                 <div className="px-2 py-2">
@@ -237,31 +241,34 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
               <Link
                 href={`/invoice/${invoice.id}`}
                 key={invoice.id}
-                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
+                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] dark:bg-dark_Navy sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
               >
                 <div className="flex justify-between">
                   <span className="text-light_blue">
-                    #<span className="heading-s text-coal">{invoice.id}</span>
+                    #
+                    <span className="heading-s text-coal dark:text-white">
+                      {invoice.id}
+                    </span>
                   </span>
 
                   {/* Mobile only */}
-                  <span className="body text-[#858BB2] sm:hidden">
+                  <span className="body text-[#858BB2] dark:text-white sm:hidden">
                     {invoice.clientName}
                   </span>
                 </div>
 
                 <div className="flex justify-between max-sm:mt-3 sm:w-full sm:items-center">
                   <div className="flex max-sm:flex-col sm:w-full sm:items-center ">
-                    <span className="body text-light_blue sm:ml-7 lg:ml-10">
+                    <span className="body text-light_blue dark:text-selago sm:ml-7 lg:ml-10">
                       {"Due " + formateDate(invoice.paymentDue)}
                     </span>
 
                     {/* Desktop only */}
-                    <span className="body ml-12 mr-auto hidden text-[#858BB2] sm:inline lg:ml-16">
+                    <span className="body ml-12 mr-auto hidden text-[#858BB2] dark:text-white sm:inline lg:ml-16">
                       {invoice.clientName}
                     </span>
 
-                    <span className="heading-s  text-coal max-sm:mt-2 sm:mr-10 ">
+                    <span className="heading-s  text-coal dark:text-white max-sm:mt-2 sm:mr-10">
                       ${invoice.total.toFixed(2)}
                     </span>
                   </div>
@@ -289,10 +296,10 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
       ) : (
         <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center 2xl:mt-16 ">
           <img src="/assets/illustration-empty.svg" alt="illustration-empty" />
-          <h3 className="heading-m mt-10 w-max text-coal sm:mt-12">
+          <h3 className="heading-m mt-10 w-max text-coal dark:text-white sm:mt-12">
             There is nothing here
           </h3>
-          <p className="body mt-5 w-[176px] text-center text-gray sm:w-[193px] ">
+          <p className="body mt-5 w-[176px] text-center text-gray dark:text-selago sm:w-[193px]">
             <span className="sm:hidden ">
               Create an invoice by clicking the{" "}
               <span className="font-bold">New</span> button and get started

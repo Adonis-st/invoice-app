@@ -13,6 +13,7 @@ import {
 import { modalAtom } from "~/store";
 import { api } from "~/utils/api";
 import { createId, uniqueId } from "~/utils/generateId";
+import { Nav } from "./Nav";
 
 interface ModalProps {
   isEdit?: boolean;
@@ -26,43 +27,22 @@ export const InvoiceModal = ({ invoice, isEdit = false }: ModalProps) => {
 
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-10 "
-          onClose={() => setIsOpen(false)}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-50 " />
-          </Transition.Child>
+      <div
+        className={`${
+          isOpen ? "translate-x-0" : "-translate-x-[110%]"
+        } .scroller fixed left-0 top-[4.5rem] z-[10] h-[calc(100vh-4.5rem)] w-full overflow-y-auto  bg-white duration-300 ease-in dark:bg-very_dark_navy sm:max-w-[616px] lg:top-0 lg:ml-[6.4375rem] lg:h-screen`}
+      >
+        <div>
+          <InvoiceForm {...{ isEdit, invoice }} />
+        </div>
+      </div>
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="min-h-full">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="mt-[72px] w-full transform bg-white shadow-xl transition-all sm:max-w-[616px] sm:rounded-r-[20px] lg:max-w-[719px]">
-                  <InvoiceForm {...{ isEdit, invoice }} />
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
+      <div
+        className={`${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed top-0 left-0 z-[1] h-screen w-full bg-black/50 `}
+        onClick={() => setIsOpen(false)}
+      />
     </>
   );
 };
@@ -171,7 +151,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
   };
   return (
     <>
-      <div className="mx-auto mt-6 w-[90%] p-1 ">
+      <div className="mx-auto mt-7 h-full px-6 sm:px-14 lg:mt-0">
         <button
           className="mt-4 flex items-center sm:hidden"
           onClick={() => setIsOpen(false)}
@@ -190,7 +170,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
           </span>
         </button>
 
-        <h1 className="pt-6 text-[1.5rem] font-bold leading-[32px] tracking-[-0.5]">
+        <h1 className="pt-6 text-[1.5rem] font-bold leading-[32px] tracking-[-0.5] dark:text-white">
           {isEdit ? (
             <>
               Edit <span className="text-gray">#</span>
@@ -386,36 +366,37 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
             })}
           </div>
 
-          {/* Desktop Only */}
+          {/* Tablet & Up */}
           <div className="mb-5 max-sm:hidden">
-            <div className="mb-3 flex w-full gap-x-4 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue">
+            <div className="mb-3 flex w-full gap-x-3 text-[0.813rem] font-medium capitalize tracking-[-0.1px] text-light_blue">
               <span className="w-[214px]">Item Name</span>
               <span className="w-[46px]">Qty.</span>
               <span className="w-[100px]">Price</span>
-              <span className="w-55px">Total</span>
+              <span className="w-[55px] text-left">Total</span>
             </div>
             {fields.map((field, index) => {
               return (
-                <div key={index} className="mb-5 flex w-full gap-x-4">
+                <div key={index} className="mb-5 flex shrink-0 grow-0 gap-x-3">
                   <TextInput
                     name={`items.${index}.name`}
-                    divClass="w-[214px]"
+                    divClass="w-[214px] shrink-0"
                     register={register}
                   />
 
                   <TextInput
-                    type="number"
+                    type="text"
                     name={`items.${index}.quantity`}
                     register={register}
-                    divClass="min-w-[46px]"
+                    divClass="w-[46px] shrink-0 "
+                    className="text-center"
                     onBlur={() => getTotal(index)}
                   />
 
                   <TextInput
-                    type="number"
+                    type="text"
                     name={`items.${index}.price`}
                     step="0.01"
-                    divClass="w-[100px] items-center "
+                    divClass="w-[100px] shrink-0"
                     // className="text-center"
                     register={register}
                     onBlur={() => getTotal(index)}
@@ -425,7 +406,8 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                     type="number"
                     name={`items.${index}.total`}
                     disabled
-                    divClass="w-[55px]"
+                    divClass="max-w-fit"
+                    // className="w-fit"
                     register={register}
                   />
 
@@ -471,7 +453,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
         </form>
       </div>
 
-      <div className="heading-s bottom-0 flex w-full bg-white p-5 leading-[15px] sm:sticky sm:rounded-r-[20px] sm:p-7">
+      <div className="heading-s sticky bottom-0 flex w-full bg-white p-5 leading-[15px] dark:bg-very_dark_navy sm:rounded-r-[20px] sm:p-7 ">
         {isEdit ? (
           <>
             <Button
@@ -497,7 +479,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
             <Button
               type="button"
               intent="secondary"
-              className="mr-2 px-[1.1rem] sm:px-6"
+              className="mr-2 px-[1.1rem] dark:bg-white dark:text-light_blue sm:px-6"
               onClick={() => setIsOpen(false)}
             >
               Discard

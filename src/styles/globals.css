@@ -8,6 +8,10 @@ body {
   font-family: "League Spartan", sans-serif;
 }
 
+body {
+  @apply bg-snow dark:bg-[#141625];
+}
+
 a {
   text-decoration: none;
 }
@@ -16,6 +20,25 @@ a {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply w-2 rounded-full bg-selago dark:bg-navy;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-light_blue/60 dark:bg-navy/70;
 }
 
 @layer components {

@@ -24,12 +24,12 @@ const LoginPage: NextPage = () => {
   if (isRedirecting) return <Spinner />;
 
   return (
-    <div className="absolute top-[40%] left-1/2 flex w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-md bg-white p-10">
-      <h1 className="text-5xl">Login</h1>
-      <p>Please login in to countinue</p>
+    <div className="absolute top-[40%] left-1/2 flex w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-md bg-white p-10 dark:bg-dark_Navy">
+      <h1 className="text-5xl dark:text-white">Login</h1>
+      <p className="dark:text-selago">Please login in to countinue</p>
       <button
         onClick={() => void signIn("google")}
-        className=" mt-3 flex  items-center rounded-full border border-stone-300 px-3 py-2"
+        className=" mt-3 flex items-center rounded-full border border-stone-300  px-3 py-2 dark:border-stone-500 dark:text-white"
       >
         <FcGoogle className="mr-2" />
         Sign in with Google

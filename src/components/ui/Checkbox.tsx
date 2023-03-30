@@ -5,7 +5,7 @@ const checkboxStyles = cva("aspect-square", {
   variants: {
     intent: {
       primary:
-        "checkbox relative cursor-pointer appearance-none rounded-sm border border-transparent lg:hover:border-purple checked:bg-purple checked:before:border-white bg-selago ",
+        "checkbox relative cursor-pointer appearance-none rounded-sm border border-transparent lg:hover:border-purple checked:bg-purple checked:before:border-white bg-selago  dark:bg-dark_Navy dark:checked:bg-purple",
     },
     size: {
       small: "text-sm py-1 px-2",
@@ -44,7 +44,7 @@ export default function Checkbox({
       />
       <label
         htmlFor={name}
-        className="heading-s ml-2 cursor-pointer text-[13px] leading-[15px] text-coal"
+        className="heading-s ml-2 cursor-pointer text-[13px] leading-[15px] text-coal dark:text-white "
       >
         {label}
       </label>

@@ -9,7 +9,7 @@ const dateStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
     intent: {
       primary:
-        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 focus:border-purple disabled:bg-transparent disabled:text-opacity-30 disabled:border-selago/30",
+        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 dark:border-navy dark:text-white bg-dark_Navy focus:border-purple disabled:bg-transparent disabled:text-opacity-30 disabled:border-selago/30 dark:disabled:border-navy/30  dark:disabled:text-opacity-30 ",
     },
     sizes: {
       sm: "w-1/2",
