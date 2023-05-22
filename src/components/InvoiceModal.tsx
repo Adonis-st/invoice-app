@@ -1,8 +1,7 @@
-import { Dialog, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Invoice, Items } from "@prisma/client";
 import { useAtom } from "jotai";
-import { Fragment, useId } from "react";
+import { useId } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Button, DatePicker, SelectDropdown, TextInput } from "~/components/ui";
 import {
@@ -13,7 +12,6 @@ import {
 import { modalAtom } from "~/store";
 import { api } from "~/utils/api";
 import { createId, uniqueId } from "~/utils/generateId";
-import { Nav } from "./Nav";
 
 interface ModalProps {
   isEdit?: boolean;
@@ -412,7 +410,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                   />
 
                   <button
-                    className="shrink-0"
+                    className="group shrink-0"
                     type="button"
                     onClick={() => remove(index)}
                   >
@@ -420,10 +418,10 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
                       width="13"
                       height="16"
                       xmlns="http://www.w3.org/2000/svg"
+                      className="fill-[#888EB0] group-hover:fill-danger"
                     >
                       <path
                         d="M11.583 3.556v10.666c0 .982-.795 1.778-1.777 1.778H2.694a1.777 1.777 0 01-1.777-1.778V3.556h10.666zM8.473 0l.888.889h3.111v1.778H.028V.889h3.11L4.029 0h4.444z"
-                        fill="#888EB0"
                         fillRule="nonzero"
                       />
                     </svg>
@@ -479,7 +477,7 @@ export const InvoiceForm = ({ isEdit, invoice }: FormProps) => {
             <Button
               type="button"
               intent="secondary"
-              className="mr-2 px-[1.1rem] dark:bg-white dark:text-light_blue sm:px-6"
+              className=" mr-2 px-[1.1rem] dark:bg-white dark:text-[#7E88C3] sm:px-6"
               onClick={() => setIsOpen(false)}
             >
               Discard

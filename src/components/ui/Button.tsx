@@ -9,8 +9,8 @@ const buttonStyles = cva(
       intent: {
         primary: "bg-purple text-white lg:hover:bg-light_purple rounded-full ",
         secondary:
-          "rounded-full  text-light_blue bg-[#F9FAFE] dark:bg-navy dark:text-selago lg:hover:bg-selago ",
-        dark: "bg-[#373B53] text-gray rounded-full dark:text-selago",
+          "rounded-full text-light_blue bg-[#F9FAFE] dark:bg-navy dark:text-selago lg:hover:bg-selago ",
+        dark: "bg-[#373B53] text-gray rounded-full dark:text-selago hover:bg-dark_Navy",
         danger: "bg-danger rounded-full text-white lg:hover:bg-danger_hover ",
       },
       size: {

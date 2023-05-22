@@ -9,7 +9,7 @@ const dateStyles = cva("rounded-md border focus:outline-none ", {
   variants: {
     intent: {
       primary:
-        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 dark:border-navy dark:text-white bg-dark_Navy focus:border-purple disabled:bg-transparent disabled:text-opacity-30 disabled:border-selago/30 dark:disabled:border-navy/30  dark:disabled:text-opacity-30 ",
+        "border-selago text-coal font-bold text-[0.938rem] tracking-[-0.25px] p-3 dark:border-navy dark:text-white dark:bg-dark_Navy focus:border-purple disabled:bg-transparent disabled:text-opacity-30 disabled:border-selago/30 dark:disabled:border-navy/30  dark:disabled:text-opacity-30 ",
     },
     sizes: {
       sm: "w-1/2",
@@ -67,10 +67,6 @@ export default function DatePicker({
   const [currentMonth, setCurrentMonth] = useState(initialCurrentMonth);
   const [currentYear, setCurrentYear] = useState(initialCurrentYear);
   const [daysInMonth, setDaysInMonth] = useState(initialDaysInMonth);
-
-  // useEffect(() => {
-  // 	setSelectedDate(new Date(value));
-  // }, [value]);
 
   const resetDaysInMonthEffect = () => {
     setDaysInMonth(getDaysInMonth(new Date(currentYear, currentMonth)));
@@ -133,7 +129,6 @@ export default function DatePicker({
     const newDate = new Date(currentYear, currentMonth, selectedDay);
     setSelectedDate(newDate);
     setValue(name, newDate);
-    // setInvoiceDate(format(newDate, "yyyy-MM-dd"));
     setOpen(false);
   };
 
@@ -161,10 +156,10 @@ export default function DatePicker({
           className={dateStyles({ intent, sizes, className })}
           style={{ borderColor: errorMessage && "#EE374A" }}
           type="text"
-          {...register(name, {
-            value: selectedDate,
-            valueAsDate: true,
-          })}
+          // {...register(name, {
+          //   value: selectedDate,
+          //   valueAsDate: true,
+          // })}
           value={format(selectedDate, "dd MMM yyyy")}
           id={name}
           readOnly={true}
@@ -191,7 +186,7 @@ export default function DatePicker({
         </svg>
       </div>
       {open && (
-        <div className="absolute top-[105%] left-0 z-[4] min-h-[243px] w-full max-w-[240px] rounded-lg bg-white p-6 text-center shadow-[0px_10px_20px_rgba(72,_84,_159,_0.25)]">
+        <div className="absolute top-[105%] left-0 z-[4] min-h-[243px] w-full max-w-[240px] rounded-lg bg-white p-6 text-center shadow-[0px_10px_20px_rgba(72,_84,_159,_0.25)] dark:bg-navy dark:text-white">
           <div className="mb-4 flex items-center justify-between font-bold ">
             <button type="button" onClick={() => handlePrevMonth()}>
               <img src="/assets/icon-arrow-left.svg" alt="Left Arrow" />

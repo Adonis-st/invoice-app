@@ -241,7 +241,7 @@ const InvoiceList = ({ checked }: { checked: Filter }) => {
               <Link
                 href={`/invoice/${invoice.id}`}
                 key={invoice.id}
-                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] dark:bg-dark_Navy sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
+                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] last:mb-12 dark:bg-dark_Navy sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
               >
                 <div className="flex justify-between">
                   <span className="text-light_blue">
