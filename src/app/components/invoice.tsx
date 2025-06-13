@@ -1,0 +1,299 @@
+"use client";
+
+import { Dialog, Transition } from "@headlessui/react";
+import { useAtom } from "jotai";
+import Error from "next/error";
+import Link from "next/link";
+import { useRouter, type NextRouter } from "next/navigation";
+import {
+  Fragment,
+  useEffect,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { InvoiceModal } from "~/components/InvoiceModal";
+import { Button, Spinner } from "~/components/ui";
+import { modalAtom } from "~/store";
+import { api } from "~/utils/api";
+import { formateDate } from "~/utils/formateDate";
+import { InvoiceStatus } from "~/utils/Status";
+import { Invoice as InvoiceType } from "@prisma/client";
+
+export const Invoice = ({ invoice }: { invoice: InvoiceType }) => {
+  const [isOpen, setIsopen] = useAtom(modalAtom);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  if (!invoice) return <Error statusCode={404} />;
+
+  return (
+    <>
+      <div className="mx-auto mt-7 min-h-screen max-sm:w-[87%] sm:mt-12 sm:max-w-[688px] lg:max-w-[730px]">
+        {/* <InvoiceModal invoice={invoice} isEdit={true} /> */}
+        {/* {isDeleting && (
+          <DeleteModal {...{ invoiceId, setIsDeleting, router }} />
+        )} */}
+        <Link href={`/${invoice.userId}`} className="group flex items-center">
+          <svg width="7" height="10" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M6.342.886L2.114 5.114l4.228 4.228"
+              stroke="#9277FF"
+              strokeWidth="2"
+              fill="none"
+              fillRule="evenodd"
+            />
+          </svg>
+          <span className="heading-s ml-4 leading-[15px] text-coal group-hover:text-light_blue dark:text-white ">
+            Go Back
+          </span>
+        </Link>
+
+        <div className="mt-7 flex items-center rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] dark:bg-dark_Navy sm:justify-between lg:p-7">
+          <div className="flex items-center max-sm:w-full max-sm:justify-between">
+            <span className="body text-[#858BB2] sm:mr-4">Status</span>
+            {InvoiceStatus(invoice?.status)}
+          </div>
+
+          {/* Tablet & Up  */}
+          <div className="heading-s hidden items-center bg-white  leading-[15px] dark:bg-dark_Navy sm:flex">
+            <Button
+              intent="secondary"
+              onClick={() => setIsopen(true)}
+              className="mr-2 px-[1.5rem]"
+            >
+              Edit
+            </Button>
+            <Button
+              intent="danger"
+              onClick={() => setIsDeleting(true)}
+              className=" mr-2 px-[1.5rem] "
+            >
+              Delete
+            </Button>
+            <Button
+              className="heading-s px-[1.5rem] leading-[15px]"
+              // onClick={() => markAsPaid(invoice.id)}
+            >
+              Mark as Paid
+            </Button>
+          </div>
+        </div>
+
+        <div className="body mt-5 rounded-lg bg-white p-5 leading-[15px] text-light_blue dark:bg-dark_Navy dark:text-selago sm:p-7 lg:p-11">
+          <div className="flex justify-between max-sm:flex-col ">
+            <div className="">
+              #
+              <span className="heading-s leading-[20px] text-coal dark:text-white">
+                {invoice.id}
+              </span>
+              <div className="mt-2">{invoice.description}</div>
+            </div>
+
+            <div className="flex flex-col max-sm:mt-6 sm:text-right">
+              <span className="">{invoice.senderStreet}</span>
+              <span className="mt-1">{invoice.senderCity}</span>
+              <span className="mt-1">{invoice.senderZipCode}</span>
+              <span className="mt-1">{invoice.senderCountry}</span>
+            </div>
+          </div>
+
+          <div className="mt-6 sm:flex">
+            <div className="flex ">
+              <div className="flex flex-col">
+                <span>Invoice Date</span>
+                <span className="heading-s mt-3 leading-[20px] text-coal dark:text-white">
+                  {formateDate(invoice.createdAt)}
+                </span>
+                <span className="mt-7">Payment Due</span>
+                <span className="heading-s mt-3 leading-[20px] text-coal dark:text-white">
+                  {formateDate(invoice.paymentDue)}
+                </span>
+              </div>
+              <div className="ml-20 flex flex-col sm:ml-24">
+                <span>Bill To</span>
+                <span className="heading-s mt-3 leading-[20px] text-coal dark:text-white">
+                  {invoice.clientName}
+                </span>
+                <span className="mt-2">{invoice.clientStreet}</span>
+                <span className="mt-1">{invoice.clientCity}</span>
+                <span className="mt-1">{invoice.clientZipCode}</span>
+                <span className="mt-1">{invoice.clientCountry}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col max-sm:mt-7 sm:ml-24">
+              <span className="">Sent to</span>
+              <span className="heading-s mt-3 leading-[20px] text-coal dark:text-white">
+                {invoice.clientEmail}
+              </span>
+            </div>
+          </div>
+
+          <div className="mx-auto mt-7 flex flex-col max-sm:w-[98%] sm:mx-1">
+            {/* //Todo fix this on mobile */}
+            <div className="rounded-t-lg bg-[#F9FAFE] p-6 dark:bg-navy sm:p-7">
+              <table className="w-full">
+                <tr className="body mb-6 text-left text-light_blue dark:text-selago max-sm:hidden">
+                  <th className="w-1/2 font-medium">Item Name</th>
+                  <th className="font-medium">QTY.</th>
+                  <th className="text-right font-medium">Price</th>
+                  <th className="text-right font-medium">Total</th>
+                </tr>
+                <div className="mb-6 max-sm:hidden" />
+
+                {invoice.items.map((item, index) => {
+                  return (
+                    <>
+                      <tr className="mb-5  last:mb-0" key={index}>
+                        <div className="max-sm:flex max-sm:flex-col">
+                          <td className="heading-s leading-[20px] text-coal dark:text-white">
+                            {item.name}
+                          </td>
+
+                          {/* Mobile Only */}
+                          <span className="heading-s mt-1 leading-[15px] dark:text-selago sm:hidden">
+                            {item.quantity} x ${item.price.toFixed(2)}
+                          </span>
+                        </div>
+
+                        {/* Desktop Only */}
+                        <td className="dark:text-selago max-sm:hidden">
+                          {item.quantity}
+                        </td>
+                        <td className="text-right dark:text-selago max-sm:hidden">
+                          ${item.price.toFixed(2)}
+                        </td>
+
+                        <td className="heading-s text-right leading-[20px] text-coal dark:text-white">
+                          ${item.total.toFixed(2)}
+                        </td>
+                      </tr>
+                      <div className="mb-6 last:mb-0" />
+                    </>
+                  );
+                })}
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between rounded-b-lg bg-[#373B53] p-6 dark:bg-coal">
+              <span className="body text-white">Amount Due</span>
+
+              <span className="text-[1.5rem] font-bold leading-[32px] tracking-[-0.5px] text-white">
+                ${invoice.total.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile only */}
+      <div className="heading-s mt-10 flex justify-evenly bg-white p-6 leading-[15px] sm:hidden">
+        <Button intent="secondary" size="sm" onClick={() => setIsopen(true)}>
+          Edit
+        </Button>
+        <Button intent="danger" size="sm" onClick={() => setIsDeleting(true)}>
+          Delete
+        </Button>
+        <Button
+        // onClick={() => markAsPaid(invoice.id)}
+        >
+          Mark as Paid
+        </Button>
+      </div>
+    </>
+  );
+};
+
+interface DeleteModalProps {
+  invoiceId: string;
+  setIsDeleting: Dispatch<SetStateAction<boolean>>;
+  router: NextRouter;
+}
+
+const DeleteModal = ({
+  invoiceId,
+  setIsDeleting,
+  router,
+}: DeleteModalProps) => {
+  const closeModal = () => setIsDeleting(false);
+  const utils = api.useContext();
+
+  const { mutate: deleteInvoice, isLoading } =
+    api.invoice.deleteInvoice.useMutation({
+      onSuccess: () => {
+        void utils.invoice.getAllInvoices.invalidate();
+        void router.push("/");
+      },
+    });
+
+  return (
+    <>
+      <Transition appear show={true} as={Fragment}>
+        <Dialog as="div" className="relative z-20" onClose={closeModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-50" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 ">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-[327px] transform overflow-hidden rounded-lg bg-white  p-9 text-left align-middle shadow-xl transition-all dark:bg-dark_Navy sm:max-w-[480px] sm:p-12">
+                  <Dialog.Title
+                    as="h3"
+                    className="heading-m tracking-[-0.5px] text-coal dark:text-white"
+                  >
+                    Confirm Deletion
+                  </Dialog.Title>
+
+                  <p className="body mt-2 leading-[22px] text-gray dark:text-selago">
+                    Are you sure you want to delete invoice #{invoiceId}? This
+                    action cannot be undone.
+                  </p>
+
+                  <div className="mt-4 flex justify-end ">
+                    <Button
+                      type="button"
+                      intent="secondary"
+                      size="sm"
+                      className="heading-s mr-3"
+                      onClick={() => setIsDeleting(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      isLoading={isLoading}
+                      intent="danger"
+                      className="heading-s "
+                      onClick={() => deleteInvoice(invoiceId)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </>
+  );
+};

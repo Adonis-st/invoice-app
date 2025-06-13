@@ -1,0 +1,293 @@
+"use client";
+
+import { Menu, Transition } from "@headlessui/react";
+import { useAtom } from "jotai";
+import Link from "next/link";
+import {
+  Fragment,
+  useState,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { InvoiceModal } from "~/components/InvoiceModal";
+import { Button, Checkbox, Spinner } from "~/components/ui";
+import { type Filter } from "~/schemas/invoiceInfo";
+import { modalAtom } from "~/store";
+import { formateDate } from "~/utils/formateDate";
+import { InvoiceStatus } from "~/utils/Status";
+import { Invoice as InvoiceType } from "@prisma/client";
+
+export const InvoiceList = ({ invoices }: { invoices: InvoiceType[] }) => {
+  const [isOpen, setIsopen] = useAtom(modalAtom);
+  const [checked, setChecked] = useState({
+    draft: true,
+    pending: true,
+    paid: true,
+  });
+
+  const { draft, pending, paid } = checked;
+
+  const totalInvoice = () => {
+    let filteredInvoice = "total";
+
+    if (draft && !pending && !paid) {
+      filteredInvoice = "draft";
+    } else if (pending && !draft && !paid) {
+      filteredInvoice = "pending";
+    } else if (paid && !pending && !draft) {
+      filteredInvoice = "paid";
+    }
+
+    return filteredInvoice;
+  };
+
+  return (
+    <>
+      <main>
+        <div className="mx-auto mt-8 w-[90%] sm:mt-12 sm:max-w-[672px] lg:mt-16 lg:max-w-[730px]">
+          {isOpen && <InvoiceModal />}
+
+          <div className="flex justify-between">
+            <div>
+              <h1 className="heading-m sm:heading-l text-coal dark:text-white">
+                Invoices
+              </h1>
+
+              {/* Mobile only */}
+              <span className="body leading-[15px] text-gray dark:text-selago sm:hidden">
+                {invoices?.length
+                  ? `${invoices?.length} invoices`
+                  : "No Invoices"}
+              </span>
+
+              {/* Desktop only */}
+              <span className="body hidden leading-[15px] text-gray dark:text-selago sm:inline">
+                {invoices?.length
+                  ? `There are ${invoices?.length} ${totalInvoice()} invoices`
+                  : "No Invoices"}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Filter {...{ checked, setChecked }} />
+
+              <Button
+                size="xs"
+                className="body flex items-center justify-center pr-2 sm:pr-4"
+                onClick={() => setIsopen(true)}
+              >
+                <div className="mr-2 rounded-full bg-white p-[.67rem] sm:mr-4">
+                  <svg
+                    width="11"
+                    height="11"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6.313 10.023v-3.71h3.71v-2.58h-3.71V.023h-2.58v3.71H.023v2.58h3.71v3.71z"
+                      fill="#7C5DFA"
+                      fillRule="nonzero"
+                    />
+                  </svg>
+                </div>
+                <span className="sm:hidden">New</span>
+                <span className="heading-s hidden sm:inline">New Invoice</span>
+              </Button>
+            </div>
+          </div>
+          <InvoiceListItems checked={checked} invoices={invoices} />
+        </div>
+      </main>
+    </>
+  );
+};
+
+const Filter = ({
+  checked,
+  setChecked,
+}: {
+  checked: Filter;
+  setChecked: Dispatch<SetStateAction<Filter>>;
+}) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setChecked((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.checked,
+    }));
+  };
+
+  return (
+    <Menu as="div" className="relative inline-block text-left">
+      {({ open }) => (
+        <>
+          <div>
+            <Menu.Button className="inline-flex w-full  items-center justify-center rounded-md  bg-opacity-20 px-4 py-2 text-sm font-bold text-coal hover:bg-opacity-30 sm:mr-6">
+              <span className="dark:text-white sm:hidden">Filter</span>
+              <span className="hidden dark:text-white sm:inline">
+                Filter by Status
+              </span>
+              <svg
+                width="11"
+                height="7"
+                xmlns="http://www.w3.org/2000/svg"
+                className={`${
+                  open ? "rotate-180" : ""
+                } ml-2 text-purple  transition duration-200 ease-in-out `}
+                aria-hidden="true"
+              >
+                <path
+                  d="M1 1l4.228 4.228L9.456 1"
+                  stroke="#7C5DFA"
+                  strokeWidth="2"
+                  fill="none"
+                  fillRule="evenodd"
+                />
+              </svg>
+            </Menu.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items
+              className="absolute right-0 mt-2 w-32 rounded-lg 
+                  bg-white shadow-[0px_10px_20px_rgba(72,84,159,0.25)] focus:outline-none dark:bg-navy"
+            >
+              <div className="px-1 py-1">
+                <div className="px-2 py-2">
+                  <Checkbox
+                    name="draft"
+                    label="Draft"
+                    checked={checked.draft}
+                    onChange={handleChange}
+                  />
+
+                  <Checkbox
+                    name="pending"
+                    label="Pending"
+                    checked={checked.pending}
+                    onChange={handleChange}
+                  />
+
+                  <Checkbox
+                    name="paid"
+                    label="Paid"
+                    checked={checked.paid}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </Menu.Items>
+          </Transition>
+        </>
+      )}
+    </Menu>
+  );
+};
+
+const InvoiceListItems = ({
+  checked,
+  invoices,
+}: {
+  checked: Filter;
+  invoices: InvoiceType[];
+}) => {
+  //   const { data: invoices, isLoading } =
+  //     api.invoice.getAllInvoices.useQuery(checked);
+
+  //   if (isLoading) return <Spinner />;
+
+  return (
+    <>
+      {invoices?.length ? (
+        <div className="mt-10 lg:mt-14">
+          {invoices?.map((invoice) => {
+            return (
+              <Link
+                href={`/${invoice.userId}/${invoice.id}`}
+                key={invoice.id}
+                className="mb-4 block rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,_84,_159,_0.100397)] last:mb-12 dark:bg-dark_Navy sm:flex sm:items-center sm:px-5 sm:py-4 lg:px-6"
+              >
+                <div className="flex justify-between">
+                  <span className="text-light_blue">
+                    #
+                    <span className="heading-s text-coal dark:text-white">
+                      {invoice.id}
+                    </span>
+                  </span>
+
+                  {/* Mobile only */}
+                  <span className="body text-[#858BB2] dark:text-white sm:hidden">
+                    {invoice.clientName}
+                  </span>
+                </div>
+
+                <div className="flex justify-between max-sm:mt-3 sm:w-full sm:items-center">
+                  <div className="flex max-sm:flex-col sm:w-full sm:items-center ">
+                    <span className="body text-light_blue dark:text-selago sm:ml-7 lg:ml-10">
+                      {"Due " + formateDate(invoice.paymentDue)}
+                    </span>
+
+                    {/* Desktop only */}
+                    <span className="body ml-12 mr-auto hidden text-[#858BB2] dark:text-white sm:inline lg:ml-16">
+                      {invoice.clientName}
+                    </span>
+
+                    <span className="heading-s  text-coal dark:text-white max-sm:mt-2 sm:mr-10">
+                      ${invoice.total.toFixed(2)}
+                    </span>
+                  </div>
+                  {InvoiceStatus(invoice.status)}
+
+                  <svg
+                    width="7"
+                    height="10"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="ml-5 hidden sm:inline"
+                  >
+                    <path
+                      d="M1 1l4 4-4 4"
+                      stroke="#7C5DFA"
+                      strokeWidth="2"
+                      fill="none"
+                      fillRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center 2xl:mt-16 ">
+          <img src="/assets/illustration-empty.svg" alt="illustration-empty" />
+          <h3 className="heading-m mt-10 w-max text-coal dark:text-white sm:mt-12">
+            There is nothing here
+          </h3>
+          <p className="body mt-5 w-[176px] text-center text-gray dark:text-selago sm:w-[193px]">
+            <span className="sm:hidden ">
+              Create an invoice by clicking the{" "}
+              <span className="font-bold">New</span> button and get started
+            </span>
+
+            <span className="hidden sm:inline lg:hidden ">
+              Create a new invoice by clicking the{" "}
+              <span className="font-bold">New Invoice</span> button and get
+              started
+            </span>
+
+            <span className="hidden lg:inline ">
+              Create an invoice by clicking the{" "}
+              <span className="font-bold">New Invoice</span> button and get
+              started
+            </span>
+          </p>
+        </div>
+      )}
+    </>
+  );
+};

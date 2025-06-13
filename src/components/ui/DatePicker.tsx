@@ -1,3 +1,5 @@
+"use client";
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { format, getDaysInMonth, getYear } from "date-fns";
 import { useAtom } from "jotai";
@@ -186,7 +188,7 @@ export default function DatePicker({
         </svg>
       </div>
       {open && (
-        <div className="absolute top-[105%] left-0 z-[4] min-h-[243px] w-full max-w-[240px] rounded-lg bg-white p-6 text-center shadow-[0px_10px_20px_rgba(72,_84,_159,_0.25)] dark:bg-navy dark:text-white">
+        <div className="absolute left-0 top-[105%] z-[4] min-h-[243px] w-full max-w-[240px] rounded-lg bg-white p-6 text-center shadow-[0px_10px_20px_rgba(72,_84,_159,_0.25)] dark:bg-navy dark:text-white">
           <div className="mb-4 flex items-center justify-between font-bold ">
             <button type="button" onClick={() => handlePrevMonth()}>
               <img src="/assets/icon-arrow-left.svg" alt="Left Arrow" />
